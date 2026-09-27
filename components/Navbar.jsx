@@ -5,6 +5,9 @@ import { usePathname } from 'next/navigation';
 import { useAuth } from '../lib/AuthContext';
 import { Compass, PlusCircle, Layers, Lock, LogOut, ShieldCheck } from 'lucide-react';
 
+import whiteLogo from './White-Logo.png';
+import Image from 'next/image';
+
 export default function Navbar() {
   const pathname = usePathname();
   const { isAdmin, logout } = useAuth();
@@ -15,10 +18,11 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           {/* Brand */}
           <Link href={isAdmin ? '/' : pathname} className="flex items-center gap-3 group">
-            <img 
-              src="/logo.png" 
-              alt="Logo" 
-              className="h-10 w-auto object-contain drop-shadow" 
+            <Image 
+              src={whiteLogo} 
+              alt="Noor E Haram Logo" 
+              className="h-10 w-auto object-contain drop-shadow"
+              priority
             />
             <div>
               <div className="flex items-center gap-2">
