@@ -25,7 +25,8 @@ import {
   Calendar, 
   Building2,
   CheckCircle2,
-  Edit3
+  Edit3,
+  Printer
 } from 'lucide-react';
 
 export default function VoucherDetailPage() {
