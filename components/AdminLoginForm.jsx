@@ -49,7 +49,7 @@ export default function AdminLoginForm({ onLoginSuccess }) {
                 type="password"
                 required
                 autoFocus
-                placeholder="Enter password (e.g. admin or noor786)"
+                placeholder="Enter password"
                 value={password}
                 onChange={(e) => {
                   setPassword(e.target.value);
@@ -61,7 +61,7 @@ export default function AdminLoginForm({ onLoginSuccess }) {
             {error && (
               <p className="flex items-center gap-1 text-xs text-red-600 font-medium pt-1">
                 <AlertCircle className="w-3.5 h-3.5" />
-                <span>Incorrect password. (Hint: <code>admin</code> or <code>noor786</code>)</span>
+                <span>Incorrect password. Please try again.</span>
               </p>
             )}
           </div>

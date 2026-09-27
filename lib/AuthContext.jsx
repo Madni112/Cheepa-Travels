@@ -23,8 +23,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = (password) => {
-    // Default admin password or PIN
-    if (password === 'admin' || password === 'admin123' || password === 'noor786' || password === '1234') {
+    if (password === 'Noor@.5923') {
       setIsAdmin(true);
       if (typeof window !== 'undefined') {
         localStorage.setItem('noor_admin_auth', 'true');
