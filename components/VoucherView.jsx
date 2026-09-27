@@ -254,7 +254,7 @@ export default function VoucherView({ voucher, origin = '' }) {
               <th className="border border-slate-300 py-1 px-4">HOTEL NAME</th>
               <th className="border border-slate-300 py-1 px-2 text-center">VIEW</th>
               <th className="border border-slate-300 py-1 px-2 text-center">MEAL</th>
-              <th className="border border-slate-300 py-1 px-2 text-center">CONF#</th>
+              <th className="border border-slate-300 py-1 px-2 text-center">HCN#</th>
               <th className="border border-slate-300 py-1 px-3">ROOM TYPE</th>
               <th className="border border-slate-300 py-1 px-3 text-center">CHECKIN</th>
               <th className="border border-slate-300 py-1 px-3 text-center">CHECKOUT</th>
@@ -277,8 +277,8 @@ export default function VoucherView({ voucher, origin = '' }) {
                   <td className="border border-slate-300 py-1.5 px-2 text-center text-slate-600 font-semibold">
                     RO
                   </td>
-                  <td className="border border-slate-300 py-1.5 px-2 text-center font-mono text-slate-500">
-                    {acc.hotelCode || '378'}
+                  <td className="border border-slate-300 py-1.5 px-2 text-center font-mono font-semibold text-slate-700">
+                    {acc.hcn || acc.hotelCode || acc.confirmationNo || '378'}
                   </td>
                   <td className="border border-slate-300 py-1.5 px-3 text-slate-800 font-medium">
                     {acc.roomType || 'Double Bed'}

@@ -478,13 +478,13 @@ export default function EditVoucherPage() {
                         <option value="MADINAH">Madinah</option>
                       </select>
                     </div>
-                    <div className="col-span-3">
+                    <div className="col-span-2">
                       <input 
                         type="text"
                         placeholder="Hotel Name"
                         value={acc.hotelName}
                         onChange={(e) => updateAccommodation(idx, 'hotelName', e.target.value)}
-                        className="w-full px-2.5 py-1.5 border border-slate-300 rounded bg-white font-semibold text-slate-900"
+                        className="w-full px-2 py-1.5 border border-slate-300 rounded bg-white font-semibold text-slate-900"
                       />
                     </div>
                     <div className="col-span-2">
@@ -493,7 +493,17 @@ export default function EditVoucherPage() {
                         placeholder="Room Type"
                         value={acc.roomType}
                         onChange={(e) => updateAccommodation(idx, 'roomType', e.target.value)}
-                        className="w-full px-2.5 py-1.5 border border-slate-300 rounded bg-white"
+                        className="w-full px-2 py-1.5 border border-slate-300 rounded bg-white"
+                      />
+                    </div>
+                    <div className="col-span-1">
+                      <input 
+                        type="text"
+                        placeholder="HCN#"
+                        value={acc.hcn !== undefined ? acc.hcn : (acc.hotelCode || '')}
+                        onChange={(e) => updateAccommodation(idx, 'hcn', e.target.value)}
+                        className="w-full px-1.5 py-1.5 border border-slate-300 rounded bg-white font-mono text-center text-[11px]"
+                        title="Hotel Confirmation / Contract Number (HCN#)"
                       />
                     </div>
                     <div className="col-span-2">
@@ -514,7 +524,7 @@ export default function EditVoucherPage() {
                         className="w-full px-2 py-1.5 border border-slate-300 rounded bg-white text-[11px]"
                       />
                     </div>
-                    <div className="col-span-1 flex items-center justify-end gap-1.5">
+                    <div className="col-span-1 flex items-center justify-end gap-1">
                       <span className="px-1.5 py-1 bg-amber-100 text-amber-900 font-bold rounded text-[11px] whitespace-nowrap" title="Calculated Nights">
                         {computedNights}N
                       </span>
@@ -522,7 +532,7 @@ export default function EditVoucherPage() {
                         <button
                           type="button"
                           onClick={() => removeAccommodation(idx)}
-                          className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded"
+                          className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded"
                           title="Remove Hotel"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
