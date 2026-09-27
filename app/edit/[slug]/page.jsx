@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
-import { getVoucherBySlug, updateVoucher, slugify } from '../../../lib/vouchersData';
+import { getVoucherBySlug, updateVoucher, slugify, fetchSupabaseVoucherBySlug } from '../../../lib/vouchersData';
 import { calculateNights } from '../../../lib/dateUtils';
 import { useAuth } from '../../../lib/AuthContext';
 import AdminLoginForm from '../../../components/AdminLoginForm';
@@ -47,9 +47,10 @@ export default function EditVoucherPage() {
 
   useEffect(() => {
     if (slug) {
-      const found = getVoucherBySlug(slug);
-      if (found) {
-        const defaultUb = `UB-${100000 + parseInt(found.id || 1) * 1111}`;
+      const applyData = (found) => {
+        if (!found) return;
+        const idNum = parseInt(found.id || 1) || 1;
+        const defaultUb = `UB-${String(idNum).padStart(4, '0')}`;
         setVoucher(found);
         setParty(found.party || '');
         setUbNumber(found.ubNumber || found.voucherRefNo || defaultUb);
@@ -73,7 +74,15 @@ export default function EditVoucherPage() {
           { pnr: 'GDKHVK', date: '2026-10-01', flight: 'F3-830', from: 'KHI', to: 'JED', departure: '08:00', arrival: '10:05' },
           { pnr: 'GDKHVK', date: '2026-10-19', flight: 'F3-829', from: 'JED', to: 'KHI', departure: '12:45', arrival: '07:00' }
         ]);
-      }
+      };
+
+      const localFound = getVoucherBySlug(slug);
+      if (localFound) applyData(localFound);
+
+      fetchSupabaseVoucherBySlug(slug).then((liveFound) => {
+        if (liveFound) applyData(liveFound);
+      });
+
       setLoading(false);
     }
   }, [slug]);
