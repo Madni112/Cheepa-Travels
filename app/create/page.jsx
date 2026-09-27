@@ -1,0 +1,584 @@
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { saveCustomVoucher, slugify } from '../../lib/vouchersData';
+import { calculateNights } from '../../lib/dateUtils';
+import { useAuth } from '../../lib/AuthContext';
+import AdminLoginForm from '../../components/AdminLoginForm';
+import { 
+  ArrowLeft, 
+  Plus, 
+  Trash2, 
+  Sparkles, 
+  Check, 
+  Building2, 
+  Bus, 
+  Plane, 
+  Users, 
+  ShieldCheck, 
+  FileText 
+} from 'lucide-react';
+
+export default function CreateVoucherPage() {
+  const router = useRouter();
+  const { isAdmin, isLoaded } = useAuth();
+
+  const [companyName, setCompanyName] = useState('NOOR E HARAM TRAVEL & TOURS');
+  const [phone, setPhone] = useState('Mob : UBAID RAZA +92-311-2264567 / +92-348-3138424');
+  const [emergencyContact, setEmergencyContact] = useState('+966 50 627 7492');
+  const [party, setParty] = useState('');
+  const [ubNumber, setUbNumber] = useState(`UB-${100000 + Math.floor(1000 + Math.random() * 9000)}`);
+  const [groundTransport, setGroundTransport] = useState('+92 328 8189989');
+  const [makkahHelpline, setMakkahHelpline] = useState('+966 53 649 2846');
+  const [madinahHelpline, setMadinahHelpline] = useState('+966 57 593 0550');
+  const [pakistanHelpline, setPakistanHelpline] = useState('+92 311 2264567');
+  const [executive, setExecutive] = useState('ADMIN');
+  const [paxCounts, setPaxCounts] = useState('GENT(S):1 LAD(IES):0 CHILD(REN): 0 INFANT(S):0');
+
+  if (!isLoaded) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="w-10 h-10 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    return <AdminLoginForm />;
+  }
+
+  const [passengers, setPassengers] = useState([
+    { sNo: '1', name: '', passportNo: '', group: '', visaNo: '' },
+  ]);
+
+  const [accommodations, setAccommodations] = useState([
+    { city: 'MAKKAH', hotelCode: '378', hotelName: '', roomType: 'DOUBLE', checkIn: '', checkOut: '', nights: '5' },
+    { city: 'MADINAH', hotelCode: '378', hotelName: '', roomType: 'DOUBLE', checkIn: '', checkOut: '', nights: '5' },
+  ]);
+
+  const [transports, setTransports] = useState([
+    { sNo: '1', tnNo: '317', service: 'JED AIRPORT TO MAKKAH HOTEL', vehicle: 'BUS', pickupDate: '', contactPerson: '', bookingRefNo: '' },
+  ]);
+
+  const [flights, setFlights] = useState([
+    { pnr: '', date: '', flight: '', from: 'KHI', to: 'JED', departure: '', arrival: '' },
+  ]);
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Add passenger row
+  const addPassenger = () => {
+    setPassengers([
+      ...passengers,
+      { sNo: (passengers.length + 1).toString(), name: '', passportNo: '', group: '', visaNo: '' },
+    ]);
+  };
+
+  const removePassenger = (index) => {
+    setPassengers(passengers.filter((_, i) => i !== index));
+  };
+
+  const updatePassenger = (index, field, value) => {
+    const copy = [...passengers];
+    copy[index][field] = value;
+    setPassengers(copy);
+  };
+
+  // Add Accommodation
+  const addAccommodation = () => {
+    setAccommodations([
+      ...accommodations,
+      { city: 'MAKKAH', hotelCode: '378', hotelName: '', roomType: 'DOUBLE', checkIn: '', checkOut: '', nights: '1' },
+    ]);
+  };
+
+  const removeAccommodation = (index) => {
+    setAccommodations(accommodations.filter((_, i) => i !== index));
+  };
+
+  const updateAccommodation = (index, field, value) => {
+    const copy = [...accommodations];
+    copy[index] = { ...copy[index], [field]: value };
+    
+    // Auto-calculate nights if checkIn or checkOut changes
+    if (field === 'checkIn' || field === 'checkOut') {
+      const computedNights = calculateNights(copy[index].checkIn, copy[index].checkOut, copy[index].nights);
+      if (computedNights > 0) {
+        copy[index].nights = String(computedNights);
+      }
+    }
+    setAccommodations(copy);
+  };
+
+  // Add Transport
+  const addTransport = () => {
+    setTransports([
+      ...transports,
+      { sNo: (transports.length + 1).toString(), tnNo: '317', service: '', vehicle: 'BUS', pickupDate: '', contactPerson: '', bookingRefNo: '' },
+    ]);
+  };
+
+  const removeTransport = (index) => {
+    setTransports(transports.filter((_, i) => i !== index));
+  };
+
+  const updateTransport = (index, field, value) => {
+    const copy = [...transports];
+    copy[index][field] = value;
+    setTransports(copy);
+  };
+
+  // Add Flight
+  const addFlight = () => {
+    setFlights([
+      ...flights,
+      { pnr: '', date: '', flight: '', from: '', to: '', departure: '', arrival: '' },
+    ]);
+  };
+
+  const removeFlight = (index) => {
+    setFlights(flights.filter((_, i) => i !== index));
+  };
+
+  const updateFlight = (index, field, value) => {
+    const copy = [...flights];
+    copy[index][field] = value;
+    setFlights(copy);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!party.trim()) {
+      alert('Please enter a Party / Lead Passenger Name');
+      return;
+    }
+
+    setIsSubmitting(true);
+    const partySlug = slugify(party) || 'voucher-' + Date.now();
+
+    const newVoucher = {
+      id: 'custom-' + Date.now(),
+      sheetName: `Voucher - ${party}`,
+      companyName,
+      emergencyContact,
+      phone,
+      voucherTitle: 'UMRAH PACKAGE VOUCHER',
+      party: party.trim(),
+      ubNumber: ubNumber.trim(),
+      voucherRefNo: ubNumber.trim(),
+      groundTransport: groundTransport.trim(),
+      makkahHelpline: makkahHelpline.trim(),
+      madinahHelpline: madinahHelpline.trim(),
+      pakistanHelpline: pakistanHelpline.trim(),
+      slug: partySlug,
+      executive,
+      paxCounts,
+      totalPax: passengers.length,
+      passengers: passengers.filter((p) => p.name.trim() !== ''),
+      accommodations: accommodations.filter((a) => a.hotelName.trim() !== ''),
+      transports: transports.filter((t) => t.service.trim() !== ''),
+      flights: flights.filter((f) => f.flight.trim() !== ''),
+    };
+
+    saveCustomVoucher(newVoucher);
+
+    setTimeout(() => {
+      router.push(`/voucher/${partySlug}`);
+    }, 500);
+  };
+
+  return (
+    <div className="bg-slate-50 min-h-screen py-10">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+
+        {/* Back Link */}
+        <div>
+          <Link href="/" className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-emerald-700 transition-colors">
+            <ArrowLeft className="w-4 h-4" />
+            <span>Back to All Vouchers</span>
+          </Link>
+        </div>
+
+        {/* Header */}
+        <div className="bg-emerald-950 text-white p-6 sm:p-8 rounded-2xl shadow-lg border border-emerald-800 space-y-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-400/20 text-amber-300 text-xs font-semibold border border-amber-400/30">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Create New Umrah Voucher</span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold font-heading">
+            Voucher Generator &amp; QR Code Maker
+          </h1>
+          <p className="text-emerald-200/80 text-xs sm:text-sm">
+            Fill in the details below. Once generated, a custom URL slug (e.g. <code>/voucher/party-name</code>) and live QR code will be instantly created.
+          </p>
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="space-y-6 bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm">
+          
+          {/* Section 1: Agency & Party Info */}
+          <div className="space-y-4">
+            <h2 className="text-sm font-bold text-emerald-950 uppercase tracking-wider flex items-center gap-2 pb-2 border-b border-slate-100">
+              <FileText className="w-4 h-4 text-emerald-700" />
+              <span>1. Party &amp; Agency Details</span>
+            </h2>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  PARTY / LEAD PASSENGER NAME *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. MUHAMMAD TARIQ / MR"
+                  value={party}
+                  onChange={(e) => setParty(e.target.value)}
+                  className="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:bg-white uppercase font-bold"
+                />
+                <p className="text-[11px] text-slate-400 mt-1">
+                  URL: <span className="font-mono text-emerald-700 font-semibold">/voucher/{slugify(party) || 'party-name'}</span>
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  UB / VOUCHER NO *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. UB-101111"
+                  value={ubNumber}
+                  onChange={(e) => setUbNumber(e.target.value)}
+                  className="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 font-mono font-bold uppercase text-emerald-950"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  EXECUTIVE IN CHARGE
+                </label>
+                <input
+                  type="text"
+                  value={executive}
+                  onChange={(e) => setExecutive(e.target.value)}
+                  className="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500"
+                />
+              </div>
+            </div>
+
+            {/* Helplines Row */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-2">
+              <div>
+                <label className="block text-[11px] font-bold text-slate-600 mb-1">Ground Transport Helpline</label>
+                <input
+                  type="text"
+                  value={groundTransport}
+                  onChange={(e) => setGroundTransport(e.target.value)}
+                  className="w-full px-3 py-1.5 text-xs bg-slate-50 border border-slate-300 rounded-lg font-mono"
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] font-bold text-slate-600 mb-1">Makkah Helpline</label>
+                <input
+                  type="text"
+                  value={makkahHelpline}
+                  onChange={(e) => setMakkahHelpline(e.target.value)}
+                  className="w-full px-3 py-1.5 text-xs bg-slate-50 border border-slate-300 rounded-lg font-mono"
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] font-bold text-slate-600 mb-1">Madinah Helpline</label>
+                <input
+                  type="text"
+                  value={madinahHelpline}
+                  onChange={(e) => setMadinahHelpline(e.target.value)}
+                  className="w-full px-3 py-1.5 text-xs bg-slate-50 border border-slate-300 rounded-lg font-mono"
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] font-bold text-slate-600 mb-1">Pakistan 24/7 Helpline</label>
+                <input
+                  type="text"
+                  value={pakistanHelpline}
+                  onChange={(e) => setPakistanHelpline(e.target.value)}
+                  className="w-full px-3 py-1.5 text-xs bg-slate-50 border border-slate-300 rounded-lg font-mono font-bold text-emerald-800"
+                />
+              </div>
+            </div>
+
+            {/* Emergency & Pax Summary */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  EMERGENCY CONTACT (KSA)
+                </label>
+                <input
+                  type="text"
+                  value={emergencyContact}
+                  onChange={(e) => setEmergencyContact(e.target.value)}
+                  className="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  PAX SUMMARY / BREAKDOWN
+                </label>
+                <input
+                  type="text"
+                  value={paxCounts}
+                  onChange={(e) => setPaxCounts(e.target.value)}
+                  className="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Section 2: Passengers */}
+          <div className="space-y-4 pt-4 border-t border-slate-100">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-bold text-emerald-950 uppercase tracking-wider flex items-center gap-2">
+                <Users className="w-4 h-4 text-emerald-700" />
+                <span>2. Passengers (PAX) List ({passengers.length})</span>
+              </h2>
+              <button
+                type="button"
+                onClick={addPassenger}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-semibold text-xs transition-colors"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Add Passenger</span>
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              {passengers.map((pax, idx) => (
+                <div key={idx} className="flex items-center gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                  <span className="w-6 text-center font-bold text-xs text-slate-400">
+                    {idx + 1}
+                  </span>
+                  <input
+                    type="text"
+                    placeholder="Passenger Name (e.g. TARIQ AHMED / MR)"
+                    value={pax.name}
+                    onChange={(e) => updatePassenger(idx, 'name', e.target.value)}
+                    className="flex-1 px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Passport #"
+                    value={pax.passportNo}
+                    onChange={(e) => updatePassenger(idx, 'passportNo', e.target.value)}
+                    className="w-32 px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Visa #"
+                    value={pax.visaNo}
+                    onChange={(e) => updatePassenger(idx, 'visaNo', e.target.value)}
+                    className="w-28 px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                  />
+                  {passengers.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removePassenger(idx)}
+                      className="p-1.5 text-slate-400 hover:text-red-600 rounded-lg transition-colors"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Section 3: Accommodation */}
+          <div className="space-y-4 pt-4 border-t border-slate-100">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-bold text-emerald-950 uppercase tracking-wider flex items-center gap-2">
+                <Building2 className="w-4 h-4 text-emerald-700" />
+                <span>3. Accommodation Details</span>
+              </h2>
+              <button
+                type="button"
+                onClick={addAccommodation}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-semibold text-xs transition-colors"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Add Hotel</span>
+              </button>
+            </div>
+
+            <div className="space-y-2">
+              {accommodations.map((acc, idx) => {
+                const computedNights = calculateNights(acc.checkIn, acc.checkOut, acc.nights);
+                return (
+                  <div key={idx} className="grid grid-cols-12 gap-2 bg-slate-50 p-2.5 rounded-lg border border-slate-200 items-center text-xs">
+                    <div className="col-span-2">
+                      <select
+                        value={acc.city}
+                        onChange={(e) => updateAccommodation(idx, 'city', e.target.value)}
+                        className="w-full px-2 py-1.5 border border-slate-300 rounded bg-white font-bold text-slate-800"
+                      >
+                        <option value="MAKKAH">MAKKAH</option>
+                        <option value="MADINAH">MADINAH</option>
+                      </select>
+                    </div>
+                    <div className="col-span-3">
+                      <input 
+                        type="text"
+                        placeholder="Hotel Name"
+                        value={acc.hotelName}
+                        onChange={(e) => updateAccommodation(idx, 'hotelName', e.target.value)}
+                        className="w-full px-2.5 py-1.5 border border-slate-300 rounded bg-white font-semibold text-slate-900"
+                      />
+                    </div>
+                    <div className="col-span-2">
+                      <input 
+                        type="text"
+                        placeholder="Room Type (e.g. DOUBLE)"
+                        value={acc.roomType}
+                        onChange={(e) => updateAccommodation(idx, 'roomType', e.target.value)}
+                        className="w-full px-2.5 py-1.5 border border-slate-300 rounded bg-white"
+                      />
+                    </div>
+                    <div className="col-span-2">
+                      <input 
+                        type="text"
+                        placeholder="Check-in (e.g. 01-Oct-2026)"
+                        value={acc.checkIn}
+                        onChange={(e) => updateAccommodation(idx, 'checkIn', e.target.value)}
+                        className="w-full px-2 py-1.5 border border-slate-300 rounded bg-white text-[11px]"
+                      />
+                    </div>
+                    <div className="col-span-2">
+                      <input 
+                        type="text"
+                        placeholder="Check-out (e.g. 06-Oct-2026)"
+                        value={acc.checkOut}
+                        onChange={(e) => updateAccommodation(idx, 'checkOut', e.target.value)}
+                        className="w-full px-2 py-1.5 border border-slate-300 rounded bg-white text-[11px]"
+                      />
+                    </div>
+                    <div className="col-span-1 flex items-center justify-end gap-1.5">
+                      <span className="px-1.5 py-1 bg-amber-100 text-amber-900 font-bold rounded text-[11px] whitespace-nowrap" title="Calculated Nights">
+                        {computedNights}N
+                      </span>
+                      {accommodations.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removeAccommodation(idx)}
+                          className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded"
+                          title="Remove Hotel"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Section 4: Transport Services */}
+          <div className="space-y-4 pt-4 border-t border-slate-100">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-bold text-emerald-950 uppercase tracking-wider flex items-center gap-2">
+                <Bus className="w-4 h-4 text-emerald-700" />
+                <span>4. Transport Services ({transports.length})</span>
+              </h2>
+              <button
+                type="button"
+                onClick={addTransport}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-semibold text-xs transition-colors"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Add Sector</span>
+              </button>
+            </div>
+
+            <div className="space-y-2">
+              {transports.map((t, idx) => (
+                <div key={idx} className="grid grid-cols-12 gap-2 bg-slate-50 p-2.5 rounded-lg border border-slate-200 items-center text-xs">
+                  <div className="col-span-3">
+                    <input 
+                      type="text"
+                      placeholder="Transporter (e.g. Company Transport)"
+                      value={t.transporter !== undefined ? t.transporter : (idx === 0 || t.vehicle?.toUpperCase() === 'BUS' ? 'Company Transport' : 'Private Transport')}
+                      onChange={(e) => updateTransport(idx, 'transporter', e.target.value)}
+                      className="w-full px-2.5 py-1.5 border border-slate-300 rounded bg-white font-semibold text-slate-900"
+                    />
+                  </div>
+                  <div className="col-span-3">
+                    <input 
+                      type="text"
+                      placeholder="Type (e.g. Economy By Bus, GMC)"
+                      value={t.vehicle || ''}
+                      onChange={(e) => updateTransport(idx, 'vehicle', e.target.value)}
+                      className="w-full px-2.5 py-1.5 border border-slate-300 rounded bg-white"
+                    />
+                  </div>
+                  <div className="col-span-3">
+                    <input 
+                      type="text"
+                      placeholder="Sector (e.g. JED AIRPORT TO MAKKAH HOTEL)"
+                      value={t.service || ''}
+                      onChange={(e) => updateTransport(idx, 'service', e.target.value)}
+                      className="w-full px-2.5 py-1.5 border border-slate-300 rounded bg-white font-medium text-slate-800"
+                    />
+                  </div>
+                  <div className="col-span-2">
+                    <input 
+                      type="text"
+                      placeholder="Date (01-Oct-2026)"
+                      value={t.pickupDate || ''}
+                      onChange={(e) => updateTransport(idx, 'pickupDate', e.target.value)}
+                      className="w-full px-2 py-1.5 border border-slate-300 rounded bg-white text-[11px]"
+                    />
+                  </div>
+                  <div className="col-span-1 text-right">
+                    {transports.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeTransport(idx)}
+                        className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded"
+                        title="Remove Sector"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Submit Button */}
+          <div className="pt-6 border-t border-slate-100 flex items-center justify-end gap-3">
+            <Link
+              href="/"
+              className="px-5 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 font-medium text-xs transition-colors"
+            >
+              Cancel
+            </Link>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-900 to-teal-800 hover:from-emerald-800 hover:to-teal-700 text-white font-bold text-sm shadow-md transition-all disabled:opacity-50"
+            >
+              <Check className="w-4 h-4" />
+              <span>{isSubmitting ? 'Generating...' : 'Create Voucher & Generate QR Code'}</span>
+            </button>
+          </div>
+
+        </form>
+
+      </div>
+    </div>
+  );
+}
