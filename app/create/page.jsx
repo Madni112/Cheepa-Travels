@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { saveCustomVoucher, slugify, getAllVouchers, fetchSupabaseVouchers } from '../../lib/vouchersData';
-import { calculateNights } from '../../lib/dateUtils';
+import { calculateNights, computePaxSummary } from '../../lib/dateUtils';
 import { useAuth } from '../../lib/AuthContext';
 import AdminLoginForm from '../../components/AdminLoginForm';
 import { 
@@ -35,7 +35,10 @@ export default function CreateVoucherPage() {
   const [madinahHelpline, setMadinahHelpline] = useState('+966 57 593 0550');
   const [pakistanHelpline, setPakistanHelpline] = useState('+92 311 2264567');
   const [executive, setExecutive] = useState('ADMIN');
-  const [paxCounts, setPaxCounts] = useState('GENT(S):1 LAD(IES):0 CHILD(REN): 0 INFANT(S):0');
+  const [passengers, setPassengers] = useState([
+    { sNo: '1', prefix: 'MR', name: '', passportNo: '', group: '', visaNo: '' },
+  ]);
+  const [paxCounts, setPaxCounts] = useState('GENT(S): 1  LAD(IES): 0  CHILD(REN): 0  INFANT(S): 0');
 
   useEffect(() => {
     fetchSupabaseVouchers().then(list => {
@@ -69,10 +72,6 @@ export default function CreateVoucherPage() {
     return <AdminLoginForm />;
   }
 
-  const [passengers, setPassengers] = useState([
-    { sNo: '1', name: '', passportNo: '', group: '', visaNo: '' },
-  ]);
-
   const [accommodations, setAccommodations] = useState([
     { city: 'MAKKAH', hotelCode: '378', hotelName: '', roomType: 'DOUBLE', checkIn: '', checkOut: '', nights: '5' },
     { city: 'MADINAH', hotelCode: '378', hotelName: '', roomType: 'DOUBLE', checkIn: '', checkOut: '', nights: '5' },
@@ -90,20 +89,25 @@ export default function CreateVoucherPage() {
 
   // Add passenger row
   const addPassenger = () => {
-    setPassengers([
+    const nextList = [
       ...passengers,
-      { sNo: (passengers.length + 1).toString(), name: '', passportNo: '', group: '', visaNo: '' },
-    ]);
+      { sNo: (passengers.length + 1).toString(), prefix: 'MR', name: '', passportNo: '', group: '', visaNo: '' },
+    ];
+    setPassengers(nextList);
+    setPaxCounts(computePaxSummary(nextList));
   };
 
   const removePassenger = (index) => {
-    setPassengers(passengers.filter((_, i) => i !== index));
+    const nextList = passengers.filter((_, i) => i !== index);
+    setPassengers(nextList);
+    setPaxCounts(computePaxSummary(nextList));
   };
 
   const updatePassenger = (index, field, value) => {
     const copy = [...passengers];
-    copy[index][field] = value;
+    copy[index] = { ...copy[index], [field]: value };
     setPassengers(copy);
+    setPaxCounts(computePaxSummary(copy));
   };
 
   // Add Accommodation
@@ -146,7 +150,7 @@ export default function CreateVoucherPage() {
 
   const updateTransport = (index, field, value) => {
     const copy = [...transports];
-    copy[index][field] = value;
+    copy[index] = { ...copy[index], [field]: value };
     setTransports(copy);
   };
 
@@ -178,6 +182,20 @@ export default function CreateVoucherPage() {
     setIsSubmitting(true);
     const partySlug = slugify(party) || 'voucher-' + Date.now();
 
+    const formattedPassengers = passengers
+      .filter((p) => p.name.trim() !== '')
+      .map((p) => {
+        let fullName = p.name.trim();
+        const pfx = (p.prefix || 'MR').toUpperCase();
+        if (!fullName.includes('/') && pfx) {
+          fullName = `${fullName} / ${pfx}`;
+        }
+        return {
+          ...p,
+          name: fullName,
+        };
+      });
+
     const newVoucher = {
       id: 'custom-' + Date.now(),
       sheetName: `Voucher - ${party}`,
@@ -195,8 +213,8 @@ export default function CreateVoucherPage() {
       slug: partySlug,
       executive,
       paxCounts,
-      totalPax: passengers.length,
-      passengers: passengers.filter((p) => p.name.trim() !== ''),
+      totalPax: formattedPassengers.length || 1,
+      passengers: formattedPassengers,
       accommodations: accommodations.filter((a) => a.hotelName.trim() !== ''),
       transports: transports.filter((t) => t.service.trim() !== ''),
       flights: flights.filter((f) => f.flight.trim() !== ''),
@@ -344,14 +362,15 @@ export default function CreateVoucherPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  PAX SUMMARY / BREAKDOWN
+                <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center justify-between">
+                  <span>PAX SUMMARY / BREAKDOWN</span>
+                  <span className="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Auto-Calculated</span>
                 </label>
                 <input
                   type="text"
                   value={paxCounts}
                   onChange={(e) => setPaxCounts(e.target.value)}
-                  className="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500"
+                  className="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 font-semibold text-slate-800"
                 />
               </div>
             </div>
@@ -376,36 +395,49 @@ export default function CreateVoucherPage() {
 
             <div className="space-y-3">
               {passengers.map((pax, idx) => (
-                <div key={idx} className="flex items-center gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                <div key={idx} className="flex items-center gap-2 bg-slate-50 p-2.5 sm:p-3 rounded-xl border border-slate-200">
                   <span className="w-6 text-center font-bold text-xs text-slate-400">
-                    {idx + 1}
+                    #{idx + 1}
                   </span>
+                  <select
+                    value={pax.prefix || 'MR'}
+                    onChange={(e) => updatePassenger(idx, 'prefix', e.target.value)}
+                    className="w-24 px-2 py-1.5 text-xs bg-white border border-slate-300 rounded-lg font-bold text-emerald-950 focus:ring-2 focus:ring-emerald-500 shadow-xs"
+                    title="Select Prefix / Title (Mr, Mrs, Miss, Child, Infant)"
+                  >
+                    <option value="MR">MR (Gent)</option>
+                    <option value="MRS">MRS (Lady)</option>
+                    <option value="MISS">MISS (Lady)</option>
+                    <option value="CHILD">CHD (Child)</option>
+                    <option value="INFANT">INF (Infant)</option>
+                  </select>
                   <input
                     type="text"
-                    placeholder="Passenger Name (e.g. TARIQ AHMED / MR)"
+                    placeholder="Passenger Full Name"
                     value={pax.name}
                     onChange={(e) => updatePassenger(idx, 'name', e.target.value)}
-                    className="flex-1 px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                    className="flex-1 px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 uppercase font-semibold"
                   />
                   <input
                     type="text"
                     placeholder="Passport #"
                     value={pax.passportNo}
                     onChange={(e) => updatePassenger(idx, 'passportNo', e.target.value)}
-                    className="w-32 px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                    className="w-28 px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg font-mono uppercase focus:ring-2 focus:ring-emerald-500"
                   />
                   <input
                     type="text"
                     placeholder="Visa #"
                     value={pax.visaNo}
                     onChange={(e) => updatePassenger(idx, 'visaNo', e.target.value)}
-                    className="w-28 px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                    className="w-24 px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg font-mono focus:ring-2 focus:ring-emerald-500"
                   />
                   {passengers.length > 1 && (
                     <button
                       type="button"
                       onClick={() => removePassenger(idx)}
                       className="p-1.5 text-slate-400 hover:text-red-600 rounded-lg transition-colors"
+                      title="Remove Passenger"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>

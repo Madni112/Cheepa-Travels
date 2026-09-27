@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { getVoucherBySlug, updateVoucher, slugify, fetchSupabaseVoucherBySlug } from '../../../lib/vouchersData';
-import { calculateNights } from '../../../lib/dateUtils';
+import { calculateNights, computePaxSummary } from '../../../lib/dateUtils';
 import { useAuth } from '../../../lib/AuthContext';
 import AdminLoginForm from '../../../components/AdminLoginForm';
 import { 
@@ -38,7 +38,7 @@ export default function EditVoucherPage() {
   const [pakistanHelpline, setPakistanHelpline] = useState('+92 311 2264567');
   const [companyName, setCompanyName] = useState('NOOR E HARAM TRAVEL & TOURS');
   const [executive, setExecutive] = useState('ADMIN');
-  const [paxCounts, setPaxCounts] = useState('GENT(S):1 LAD(IES):1 CHILD(REN): 0 INFANT(S):0');
+  const [paxCounts, setPaxCounts] = useState('GENT(S): 1  LAD(IES): 0  CHILD(REN): 0  INFANT(S): 0');
   const [passengers, setPassengers] = useState([]);
   const [accommodations, setAccommodations] = useState([]);
   const [transports, setTransports] = useState([]);
@@ -60,10 +60,39 @@ export default function EditVoucherPage() {
         setPakistanHelpline(found.pakistanHelpline || '+92 311 2264567');
         setCompanyName(found.companyName || 'NOOR E HARAM TRAVEL & TOURS');
         setExecutive(found.executive || 'ADMIN');
-        setPaxCounts(found.paxCounts || 'GENT(S):1 LAD(IES):1 CHILD(REN): 0 INFANT(S):0');
-        setPassengers(found.passengers && found.passengers.length > 0 ? found.passengers : [
-          { sNo: '1', name: '', passportNo: '', group: '', visaNo: '' }
-        ]);
+
+        const loadedPassengers = (found.passengers && found.passengers.length > 0 ? found.passengers : [
+          { sNo: '1', prefix: 'MR', name: '', passportNo: '', group: '', visaNo: '' }
+        ]).map((p, idx) => {
+          let pfx = p.prefix || 'MR';
+          let cleanName = p.name || '';
+          if (!p.prefix && cleanName) {
+            const upper = cleanName.toUpperCase();
+            if (upper.includes('/MRS') || upper.includes('/LADY') || upper.includes('MRS.') || upper.includes('BEGUM') || upper.includes('PARVEEN') || upper.includes('BIBI') || upper.includes('KHATOON') || upper.includes('FATIMA')) {
+              pfx = 'MRS';
+            } else if (upper.includes('/MISS') || upper.includes('MISS.')) {
+              pfx = 'MISS';
+            } else if (upper.includes('/CHD') || upper.includes('/CHILD') || upper.includes('MSTR')) {
+              pfx = 'CHILD';
+            } else if (upper.includes('/INF') || upper.includes('/INFANT')) {
+              pfx = 'INFANT';
+            } else if (upper.includes('/MR') || upper.includes('MR.')) {
+              pfx = 'MR';
+            }
+          }
+          return {
+            sNo: (idx + 1).toString(),
+            prefix: pfx,
+            name: cleanName,
+            passportNo: p.passportNo || '',
+            group: p.group || '',
+            visaNo: p.visaNo || ''
+          };
+        });
+
+        setPassengers(loadedPassengers);
+        setPaxCounts(found.paxCounts || computePaxSummary(loadedPassengers));
+
         setAccommodations(found.accommodations && found.accommodations.length > 0 ? found.accommodations : [
           { city: 'MAKKAH', hotelCode: '378', hotelName: '', roomType: 'DOUBLE', checkIn: '', checkOut: '', nights: '5' }
         ]);
@@ -113,20 +142,25 @@ export default function EditVoucherPage() {
 
   // Add passenger row
   const addPassenger = () => {
-    setPassengers([
+    const nextList = [
       ...passengers,
-      { sNo: (passengers.length + 1).toString(), name: '', passportNo: '', group: '', visaNo: '' },
-    ]);
+      { sNo: (passengers.length + 1).toString(), prefix: 'MR', name: '', passportNo: '', group: '', visaNo: '' },
+    ];
+    setPassengers(nextList);
+    setPaxCounts(computePaxSummary(nextList));
   };
 
   const removePassenger = (index) => {
-    setPassengers(passengers.filter((_, i) => i !== index));
+    const nextList = passengers.filter((_, i) => i !== index);
+    setPassengers(nextList);
+    setPaxCounts(computePaxSummary(nextList));
   };
 
   const updatePassenger = (index, field, value) => {
     const copy = [...passengers];
-    copy[index][field] = value;
+    copy[index] = { ...copy[index], [field]: value };
     setPassengers(copy);
+    setPaxCounts(computePaxSummary(copy));
   };
 
   // Add Accommodation
@@ -200,6 +234,21 @@ export default function EditVoucherPage() {
 
     setIsSubmitting(true);
 
+    const processedPassengers = passengers.map((p, idx) => {
+      let name = (p.name || '').trim();
+      const upper = name.toUpperCase();
+      const hasPrefixTag = upper.includes('/MR') || upper.includes('/MRS') || upper.includes('/MISS') || upper.includes('/CHD') || upper.includes('/INF');
+      if (name && !hasPrefixTag && p.prefix) {
+        const tag = p.prefix === 'CHILD' ? 'CHD' : p.prefix === 'INFANT' ? 'INF' : p.prefix;
+        name = `${name} / ${tag}`;
+      }
+      return {
+        ...p,
+        sNo: (idx + 1).toString(),
+        name,
+      };
+    });
+
     const updatedData = {
       ...voucher,
       companyName,
@@ -213,8 +262,8 @@ export default function EditVoucherPage() {
       slug: voucher.slug || slugify(party),
       executive,
       paxCounts,
-      totalPax: passengers.length,
-      passengers,
+      totalPax: processedPassengers.length,
+      passengers: processedPassengers,
       accommodations,
       transports,
       flights,
@@ -314,14 +363,15 @@ export default function EditVoucherPage() {
               </div>
 
               <div className="sm:col-span-3">
-                <label className="block font-bold text-slate-700 mb-1">
-                  PAX Breakdown Text
+                <label className="block font-bold text-slate-700 mb-1 flex items-center justify-between">
+                  <span>PAX SUMMARY / BREAKDOWN</span>
+                  <span className="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Auto-Calculated</span>
                 </label>
                 <input 
                   type="text"
                   value={paxCounts}
                   onChange={(e) => setPaxCounts(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none text-slate-800"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none font-semibold text-slate-800 bg-slate-50"
                 />
               </div>
             </div>
@@ -408,48 +458,53 @@ export default function EditVoucherPage() {
 
             <div className="space-y-2">
               {passengers.map((pax, idx) => (
-                <div key={idx} className="grid grid-cols-12 gap-2 bg-slate-50 p-2.5 rounded-lg border border-slate-200 items-center text-xs">
-                  <div className="col-span-1 text-center font-bold text-slate-500">
+                <div key={idx} className="flex items-center gap-2 bg-slate-50 p-2.5 rounded-lg border border-slate-200 text-xs">
+                  <span className="w-6 text-center font-bold text-slate-400">
                     #{idx + 1}
-                  </div>
-                  <div className="col-span-4">
-                    <input 
-                      type="text"
-                      placeholder="Mutamer Full Name"
-                      value={pax.name}
-                      onChange={(e) => updatePassenger(idx, 'name', e.target.value)}
-                      className="w-full px-2.5 py-1.5 border border-slate-300 rounded bg-white font-semibold text-slate-900 uppercase"
-                    />
-                  </div>
-                  <div className="col-span-3">
-                    <input 
-                      type="text"
-                      placeholder="Passport No"
-                      value={pax.passportNo}
-                      onChange={(e) => updatePassenger(idx, 'passportNo', e.target.value)}
-                      className="w-full px-2.5 py-1.5 border border-slate-300 rounded bg-white font-mono uppercase"
-                    />
-                  </div>
-                  <div className="col-span-3">
-                    <input 
-                      type="text"
-                      placeholder="Group No (optional)"
-                      value={pax.group || ''}
-                      onChange={(e) => updatePassenger(idx, 'group', e.target.value)}
-                      className="w-full px-2.5 py-1.5 border border-slate-300 rounded bg-white font-mono text-slate-600"
-                    />
-                  </div>
-                  <div className="col-span-1 text-right">
-                    {passengers.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => removePassenger(idx)}
-                        className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    )}
-                  </div>
+                  </span>
+                  <select
+                    value={pax.prefix || 'MR'}
+                    onChange={(e) => updatePassenger(idx, 'prefix', e.target.value)}
+                    className="w-28 px-2 py-1.5 text-xs bg-white border border-slate-300 rounded-lg font-bold text-emerald-950 focus:ring-2 focus:ring-emerald-500 shadow-xs"
+                    title="Select Prefix / Title"
+                  >
+                    <option value="MR">MR (Gent)</option>
+                    <option value="MRS">MRS (Lady)</option>
+                    <option value="MISS">MISS (Lady)</option>
+                    <option value="CHILD">CHD (Child)</option>
+                    <option value="INFANT">INF (Infant)</option>
+                  </select>
+                  <input 
+                    type="text"
+                    placeholder="Mutamer Full Name"
+                    value={pax.name}
+                    onChange={(e) => updatePassenger(idx, 'name', e.target.value)}
+                    className="flex-1 px-2.5 py-1.5 border border-slate-300 rounded-lg bg-white font-semibold text-slate-900 uppercase focus:ring-2 focus:ring-emerald-500"
+                  />
+                  <input 
+                    type="text"
+                    placeholder="Passport #"
+                    value={pax.passportNo}
+                    onChange={(e) => updatePassenger(idx, 'passportNo', e.target.value)}
+                    className="w-28 px-2.5 py-1.5 border border-slate-300 rounded-lg bg-white font-mono uppercase focus:ring-2 focus:ring-emerald-500"
+                  />
+                  <input 
+                    type="text"
+                    placeholder="Visa #"
+                    value={pax.visaNo || ''}
+                    onChange={(e) => updatePassenger(idx, 'visaNo', e.target.value)}
+                    className="w-24 px-2.5 py-1.5 border border-slate-300 rounded-lg bg-white font-mono focus:ring-2 focus:ring-emerald-500"
+                  />
+                  {passengers.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removePassenger(idx)}
+                      className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
+                      title="Remove Passenger"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
