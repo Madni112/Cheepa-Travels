@@ -31,7 +31,8 @@ export default function VoucherView({ voucher, origin = '' }) {
   if (!voucher) return null;
   const { isAdmin } = useAuth();
   const voucherUrl = origin ? `${origin}/voucher/${voucher.slug || voucher.id}` : '';
-  const voucherRefNo = voucher.ubNumber || voucher.voucherRefNo || `UB-${100000 + parseInt(voucher.id || 1) * 1111}`;
+  const idNum = parseInt(voucher.id || 1) || 1;
+  const voucherRefNo = voucher.ubNumber || voucher.voucherRefNo || `UB-${String(idNum).padStart(4, '0')}`;
 
   const handlePrint = () => {
     if (typeof window !== 'undefined') {

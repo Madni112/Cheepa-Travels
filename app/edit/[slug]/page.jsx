@@ -281,7 +281,7 @@ export default function EditVoucherPage() {
 
               <div>
                 <label className="block font-bold text-slate-700 mb-1">
-                  UB / Voucher Number <span className="text-emerald-700 font-bold">(e.g. UB-101111)</span>
+                  UB / Voucher Number <span className="text-emerald-700 font-bold">(e.g. UB-0001)</span>
                 </label>
                 <input 
                   type="text"

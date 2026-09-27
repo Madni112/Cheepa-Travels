@@ -64,6 +64,8 @@ export default function HomePage() {
     return (
       (v.party || '').toLowerCase().includes(q) ||
       (v.sheetName || '').toLowerCase().includes(q) ||
+      (v.ubNumber || '').toLowerCase().includes(q) ||
+      (v.voucherRefNo || '').toLowerCase().includes(q) ||
       (v.id || '').toString().includes(q) ||
       (v.passengers || []).some((p) => (p.name || '').toLowerCase().includes(q) || (p.passportNo || '').toLowerCase().includes(q)) ||
       (v.accommodations || []).some((a) => (a.hotelName || '').toLowerCase().includes(q) || (a.city || '').toLowerCase().includes(q))
@@ -165,6 +167,7 @@ export default function HomePage() {
           {filtered.map((voucher) => {
             const voucherUrl = `${origin}/voucher/${voucher.slug || voucher.id}`;
             const isCopied = copiedId === voucher.id;
+            const ubBadge = voucher.ubNumber || voucher.voucherRefNo || `UB-${String(parseInt(voucher.id || 1) || 1).padStart(4, '0')}`;
 
             return (
               <div
@@ -176,10 +179,10 @@ export default function HomePage() {
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
-                          #{voucher.id}
+                        <span className="text-[11px] font-bold font-mono px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200/80">
+                          {ubBadge}
                         </span>
-                        <span className="text-xs text-slate-400 font-medium">
+                        <span className="text-xs text-slate-400 font-medium truncate max-w-[140px]">
                           {voucher.sheetName}
                         </span>
                       </div>

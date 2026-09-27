@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { saveCustomVoucher, slugify } from '../../lib/vouchersData';
+import { saveCustomVoucher, slugify, getAllVouchers, fetchSupabaseVouchers } from '../../lib/vouchersData';
 import { calculateNights } from '../../lib/dateUtils';
 import { useAuth } from '../../lib/AuthContext';
 import AdminLoginForm from '../../components/AdminLoginForm';
@@ -29,13 +29,33 @@ export default function CreateVoucherPage() {
   const [phone, setPhone] = useState('Mob : UBAID RAZA +92-311-2264567 / +92-348-3138424');
   const [emergencyContact, setEmergencyContact] = useState('+966 50 627 7492');
   const [party, setParty] = useState('');
-  const [ubNumber, setUbNumber] = useState(`UB-${100000 + Math.floor(1000 + Math.random() * 9000)}`);
+  const [ubNumber, setUbNumber] = useState('UB-0013');
   const [groundTransport, setGroundTransport] = useState('+92 328 8189989');
   const [makkahHelpline, setMakkahHelpline] = useState('+966 53 649 2846');
   const [madinahHelpline, setMadinahHelpline] = useState('+966 57 593 0550');
   const [pakistanHelpline, setPakistanHelpline] = useState('+92 311 2264567');
   const [executive, setExecutive] = useState('ADMIN');
   const [paxCounts, setPaxCounts] = useState('GENT(S):1 LAD(IES):0 CHILD(REN): 0 INFANT(S):0');
+
+  useEffect(() => {
+    fetchSupabaseVouchers().then(list => {
+      const all = list && list.length > 0 ? list : getAllVouchers();
+      let maxNum = 0;
+      all.forEach(v => {
+        const ref = v.ubNumber || v.voucherRefNo || '';
+        const match = ref.match(/UB-(\d+)/i);
+        if (match) {
+          const n = parseInt(match[1]);
+          if (!isNaN(n) && n > maxNum && n < 9000) maxNum = n;
+        } else if (v.id && !isNaN(parseInt(v.id))) {
+          const n = parseInt(v.id);
+          if (n > maxNum) maxNum = n;
+        }
+      });
+      const nextNum = (maxNum || all.length || 0) + 1;
+      setUbNumber(`UB-${String(nextNum).padStart(4, '0')}`);
+    });
+  }, []);
 
   if (!isLoaded) {
     return (
@@ -250,7 +270,7 @@ export default function CreateVoucherPage() {
                 <input
                   type="text"
                   required
-                  placeholder="e.g. UB-101111"
+                  placeholder="e.g. UB-0001"
                   value={ubNumber}
                   onChange={(e) => setUbNumber(e.target.value)}
                   className="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 font-mono font-bold uppercase text-emerald-950"
