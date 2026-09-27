@@ -131,7 +131,27 @@ export default function VoucherDetailPage() {
         <div className={`grid grid-cols-1 ${isAdmin ? 'lg:grid-cols-12 gap-8' : 'max-w-4xl mx-auto'} items-start`}>
           
           {/* Main Voucher */}
-          <div className={`${isAdmin ? 'lg:col-span-8' : 'w-full'} space-y-6 mx-auto w-full`}>
+          <div className={`${isAdmin ? 'lg:col-span-8' : 'w-full'} space-y-4 mx-auto w-full`}>
+            
+            {/* Customer Quick Actions Bar (Visible when not logged in / on mobile) */}
+            <div className="flex items-center justify-between bg-white p-3 rounded-xl border border-slate-200 shadow-xs no-print">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-xs font-bold text-slate-700">Official Electronic Voucher</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    if (typeof window !== 'undefined') window.print();
+                  }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0a192f] hover:bg-[#112a4f] text-white font-bold text-xs shadow-xs transition-all"
+                >
+                  <Printer className="w-3.5 h-3.5 text-[#dfba73]" />
+                  <span>Print / PDF</span>
+                </button>
+              </div>
+            </div>
+
             <VoucherView voucher={voucher} origin={origin} />
           </div>
 

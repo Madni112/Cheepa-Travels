@@ -65,18 +65,18 @@ export default function VoucherView({ voucher, origin = '' }) {
 
   return (
     <>
-      <div className="voucher-container max-w-[850px] mx-auto bg-white rounded-none shadow-2xl border border-slate-300 overflow-hidden text-slate-800 p-6 sm:p-7 print:p-3 print:border-2 print:border-[#0a192f] text-[11px] leading-tight print:max-w-full print:w-full print:m-0 print:flex print:flex-col print:justify-between">
+      <div className="voucher-container max-w-[850px] mx-auto bg-white rounded-none shadow-2xl border border-slate-300 overflow-hidden text-slate-800 p-4 sm:p-7 print:p-3 print:border-2 print:border-[#0a192f] text-[11px] leading-tight print:max-w-full print:w-full print:m-0 print:flex print:flex-col print:justify-between">
         
         {/* Top Content wrapper */}
         <div className="space-y-2.5 print:space-y-1.5">
         
         {/* 1. TOP HEADER SECTION */}
-      <div className="flex items-center justify-between pb-3 border-b border-slate-200 gap-3">
+      <div className="flex flex-col sm:flex-row items-center justify-between pb-3 border-b border-slate-200 gap-3 text-center sm:text-left">
         
-        {/* Left: Agency Name in a Single Line & Voucher Meta below it */}
-        <div className="space-y-1.5 flex-[1.3] text-left shrink-0">
+        {/* Left: Agency Name & Voucher Meta */}
+        <div className="space-y-1.5 flex-[1.3] text-center sm:text-left shrink-0 order-2 sm:order-1">
           <div>
-            <h1 className="text-[13.5px] sm:text-[14.5px] print:text-[12.5pt] font-extrabold tracking-tight text-[#0a192f] uppercase whitespace-nowrap">
+            <h1 className="text-[13.5px] sm:text-[14.5px] print:text-[12.5pt] font-extrabold tracking-tight text-[#0a192f] uppercase sm:whitespace-nowrap">
               {voucher.companyName || 'NOOR E HARAM TRAVEL & TOURS'}
             </h1>
             <p className="text-[10px] text-slate-500 font-semibold tracking-wide">
@@ -84,7 +84,7 @@ export default function VoucherView({ voucher, origin = '' }) {
             </p>
           </div>
 
-          {/* Voucher Meta details on left */}
+          {/* Voucher Meta details */}
           <div className="text-[10px] leading-tight space-y-0.5 text-slate-700 pt-1 print:text-[8pt]">
             <div>
               <span className="font-bold text-slate-900">Voucher Date:</span>{' '}
@@ -106,11 +106,11 @@ export default function VoucherView({ voucher, origin = '' }) {
         </div>
 
         {/* Center: Prominent Large Centered Logo + UB Ref Badge */}
-        <div className="flex flex-col items-center justify-center text-center space-y-1.5 flex-[1.4]">
+        <div className="flex flex-col items-center justify-center text-center space-y-1.5 flex-[1.4] order-1 sm:order-2">
           <img 
             src="/logo.png" 
             alt="Noor E Haram Logo" 
-            className="h-32 sm:h-36 max-w-[300px] w-auto object-contain print:h-32 drop-shadow-sm transition-all" 
+            className="h-24 sm:h-36 max-w-[250px] sm:max-w-[300px] w-auto object-contain print:h-32 drop-shadow-sm transition-all" 
           />
           <div className="flex items-center gap-1.5">
             <span className="font-extrabold text-[10.5px] tracking-wider text-[#0a192f] uppercase">
@@ -123,7 +123,7 @@ export default function VoucherView({ voucher, origin = '' }) {
         </div>
 
         {/* Right: Self Visa & Islamabad */}
-        <div className="text-right space-y-0.5 flex-[0.8] pr-1">
+        <div className="text-center sm:text-right space-y-0.5 flex-[0.8] pr-0 sm:pr-1 order-3">
           <h2 className="text-[16px] sm:text-[17px] font-black text-[#0a192f] tracking-tight uppercase">
             Self Visa
           </h2>
@@ -135,18 +135,18 @@ export default function VoucherView({ voucher, origin = '' }) {
       </div>
 
       {/* 2. FAMILY HEAD & VOUCHER NO BAR */}
-      <div className="grid grid-cols-12 bg-[#f8fafc] border border-slate-300 rounded mt-3 py-1.5 px-3 text-[11px] items-center">
-        <div className="col-span-6 flex items-center gap-2">
+      <div className="grid grid-cols-1 sm:grid-cols-12 bg-[#f8fafc] border border-slate-300 rounded mt-3 py-2 sm:py-1.5 px-3 text-[11px] items-center gap-1.5 sm:gap-0 text-center sm:text-left">
+        <div className="sm:col-span-6 flex items-center justify-center sm:justify-start gap-2">
           <span className="font-bold text-slate-600">Family Head:</span>
           <span className="font-extrabold text-[#0a192f] uppercase text-xs">
             {voucher.party || 'MUHAMMAD INSHAL SYED'}
           </span>
         </div>
-        <div className="col-span-3 flex items-center gap-1.5">
+        <div className="sm:col-span-3 flex items-center justify-center sm:justify-start gap-1.5">
           <span className="font-bold text-slate-600">Voucher No:</span>
           <span className="font-bold font-mono text-[#0a192f]">{voucherRefNo}</span>
         </div>
-        <div className="col-span-3 flex items-center justify-end gap-1.5 text-right">
+        <div className="sm:col-span-3 flex items-center justify-center sm:justify-end gap-1.5 sm:text-right">
           <span className="font-bold text-slate-600">Manual No:</span>
           <span className="font-mono text-slate-700">--</span>
         </div>
@@ -164,7 +164,8 @@ export default function VoucherView({ voucher, origin = '' }) {
           </span>
         </div>
 
-        <table className="w-full border-collapse border border-slate-300 text-left text-[10.5px]">
+        <div className="overflow-x-auto w-full -mx-1 px-1 sm:mx-0 sm:px-0">
+          <table className="w-full min-w-[620px] sm:min-w-0 border-collapse border border-slate-300 text-left text-[10.5px]">
           <thead>
             <tr className="bg-[#0a192f] text-white font-bold uppercase text-[9.5px]">
               <th className="border border-slate-300 py-1 px-2 text-center w-10">SNO</th>
@@ -220,6 +221,7 @@ export default function VoucherView({ voucher, origin = '' }) {
             )}
           </tbody>
         </table>
+        </div>
       </div>
 
       {/* 4. ACCOMMODATION ITINERARY (With APPROVED diagonal watermark) */}
@@ -244,7 +246,8 @@ export default function VoucherView({ voucher, origin = '' }) {
           </span>
         </div>
 
-        <table className="w-full border-collapse border border-slate-300 text-left text-[10.5px]">
+        <div className="overflow-x-auto w-full -mx-1 px-1 sm:mx-0 sm:px-0">
+          <table className="w-full min-w-[620px] sm:min-w-0 border-collapse border border-slate-300 text-left text-[10.5px]">
           <thead>
             <tr className="bg-[#0a192f] text-white font-bold uppercase text-[9.5px]">
               <th className="border border-slate-300 py-1 px-3">CITY</th>
@@ -310,13 +313,14 @@ export default function VoucherView({ voucher, origin = '' }) {
             </tr>
           </tbody>
         </table>
+        </div>
       </div>
 
       {/* 5. TRANSPORT & FLIGHT SCHEDULE (LEFT) + DIGITAL QR STAND (RIGHT) */}
-      <div className="grid grid-cols-12 gap-3.5 mt-3.5 items-start">
+      <div className="grid grid-cols-1 sm:grid-cols-12 gap-3.5 mt-3.5 items-start">
         
-        {/* Left 8.5 cols: Transport Services & Flight Schedule */}
-        <div className="col-span-8 space-y-3">
+        {/* Left cols: Transport Services & Flight Schedule */}
+        <div className="sm:col-span-8 space-y-3">
           
           {/* Transport Services */}
           <div className="space-y-1">
@@ -325,7 +329,8 @@ export default function VoucherView({ voucher, origin = '' }) {
               <span>TRANSPORT SERVICES</span>
             </div>
 
-            <table className="w-full border-collapse border border-slate-300 text-left text-[10px]">
+            <div className="overflow-x-auto w-full -mx-1 px-1 sm:mx-0 sm:px-0">
+              <table className="w-full min-w-[480px] sm:min-w-0 border-collapse border border-slate-300 text-left text-[10px]">
               <thead>
                 <tr className="bg-[#0a192f] text-white font-bold uppercase text-[9px]">
                   <th className="border border-slate-300 py-1 px-3 w-36">TRANSPORTER</th>
@@ -376,6 +381,7 @@ export default function VoucherView({ voucher, origin = '' }) {
                 )}
               </tbody>
             </table>
+            </div>
           </div>
 
           {/* Flight Schedule */}
@@ -385,7 +391,7 @@ export default function VoucherView({ voucher, origin = '' }) {
               <span>FLIGHT SCHEDULE</span>
             </div>
 
-            <div className="grid grid-cols-2 gap-2 text-[10px]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[10px]">
               
               {/* Departure Flight Card */}
               <div className="border border-slate-300 rounded p-2 bg-white flex flex-col justify-between">
@@ -458,8 +464,8 @@ export default function VoucherView({ voucher, origin = '' }) {
 
         </div>
 
-        {/* Right 4 cols: Digital QR Stand Card */}
-        <div className="col-span-4 border border-slate-300 rounded-xl p-3 bg-white flex flex-col items-center justify-center text-center shadow-xs">
+        {/* Right cols: Digital QR Stand Card */}
+        <div className="sm:col-span-4 border border-slate-300 rounded-xl p-3 bg-white flex flex-col items-center justify-center text-center shadow-xs">
           <div className="p-2 bg-white border border-slate-200 rounded-lg shadow-inner">
             {voucherUrl ? (
               <QRCodeSVG value={voucherUrl} size={92} level="H" />
@@ -480,16 +486,16 @@ export default function VoucherView({ voucher, origin = '' }) {
       </div>
 
       {/* 6. KSA & PAKISTAN HELPLINES BANNER */}
-      <div className="grid grid-cols-12 gap-2 mt-2.5 print:mt-1.5 print:gap-1.5">
+      <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 mt-2.5 print:mt-1.5 print:gap-1.5">
         
         {/* Left Dark KSA Helplines Box */}
-        <div className="col-span-8 bg-[#0a192f] text-white rounded p-2 text-[8.5px] print:p-1.5 print:rounded flex flex-col justify-between">
+        <div className="sm:col-span-8 bg-[#0a192f] text-white rounded p-2 text-[8.5px] print:p-1.5 print:rounded flex flex-col justify-between">
           <div className="border-b border-slate-700/80 pb-1 mb-1">
             <span className="text-[#dfba73] font-bold text-[8.5px] tracking-wider uppercase print:text-[7pt]">
               KSA OPERATIONAL HELPLINES
             </span>
           </div>
-          <div className="grid grid-cols-4 gap-1.5 text-[7.5px] leading-tight print:text-[6pt]">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 text-[7.5px] leading-tight print:text-[6pt]">
             <div className="border-r border-slate-700/60 pr-1">
               <span className="text-[#dfba73] font-bold block uppercase text-[7px] tracking-wider">JEDDAH AIRPORT</span>
               <span className="text-slate-300 block">Airport (24/7):</span>
@@ -514,7 +520,7 @@ export default function VoucherView({ voucher, origin = '' }) {
         </div>
 
         {/* Right Gold Pakistan Helpline Box */}
-        <div className="col-span-4 bg-[#fcf8ee] border-2 border-[#dfba73] rounded p-2 text-center flex flex-col justify-center print:p-1.5 print:rounded">
+        <div className="sm:col-span-4 bg-[#fcf8ee] border-2 border-[#dfba73] rounded p-2 text-center flex flex-col justify-center print:p-1.5 print:rounded">
           <span className="text-[#805a1b] font-bold text-[9px] uppercase tracking-wider block print:text-[7.5pt]">
             PAKISTAN HELPLINE (24/7)
           </span>
