@@ -265,15 +265,14 @@ export default function CreateVoucherPage() {
 
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">
-                  UB / VOUCHER NO *
+                  UB / VOUCHER NO (AUTO-GENERATED)
                 </label>
                 <input
                   type="text"
-                  required
-                  placeholder="e.g. UB-0001"
+                  readOnly
                   value={ubNumber}
-                  onChange={(e) => setUbNumber(e.target.value)}
-                  className="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 font-mono font-bold uppercase text-emerald-950"
+                  className="w-full px-3.5 py-2 text-sm bg-slate-100/90 border border-slate-300 rounded-xl font-mono font-bold uppercase text-emerald-950 cursor-not-allowed select-none focus:outline-none"
+                  title="UB Number is automatically assigned sequence-wise and cannot be edited"
                 />
               </div>
 

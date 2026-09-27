@@ -290,14 +290,14 @@ export default function EditVoucherPage() {
 
               <div>
                 <label className="block font-bold text-slate-700 mb-1">
-                  UB / Voucher Number <span className="text-emerald-700 font-bold">(e.g. UB-0001)</span>
+                  UB / Voucher Number <span className="text-slate-500 font-semibold">(System Assigned)</span>
                 </label>
                 <input 
                   type="text"
-                  required
+                  readOnly
                   value={ubNumber}
-                  onChange={(e) => setUbNumber(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none font-mono font-bold text-emerald-950 uppercase"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-slate-100 text-slate-800 font-mono font-bold uppercase cursor-not-allowed select-none focus:outline-none"
+                  title="UB Number is system assigned and cannot be edited"
                 />
               </div>
 
