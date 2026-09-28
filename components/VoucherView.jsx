@@ -27,6 +27,35 @@ import { formatVoucherDate, calculateNights, parseDateObj } from '../lib/dateUti
 
 export { formatVoucherDate, calculateNights, parseDateObj };
 
+function formatDisplayName(name) {
+  if (!name) return '—';
+  let str = String(name).trim();
+  str = str.replace(/(\s*\/\s*(MR|MRS|MS|MISS|CHD|INF|MSTR|MASTER|CHILD|INFANT|LADY|GENT))+\s*$/gi, '').trim();
+  str = str.replace(/\s*\/+\s*$/g, '').trim();
+  return str.toUpperCase();
+}
+
+function getGender(pax) {
+  const pfx = (pax?.prefix || '').toUpperCase();
+  const name = (pax?.name || '').toUpperCase();
+  if (
+    pfx === 'MRS' || pfx === 'MS' || pfx === 'MISS' || pfx === 'CHD_MISS' || pfx === 'INF_MISS' || pfx === 'LADY' ||
+    name.includes('/MRS') || name.includes('/MISS') || name.includes('/MS') ||
+    name.includes('BEGUM') || name.includes('PARVEEN') || name.includes('KHATOON') || name.includes('BIBI') || name.includes('FATIMA') || name.includes('SAIMA') || name.includes('AASIA') || name.includes('SADIA') || name.includes('UMAIMA') || name.includes('RUKHSANA') || name.includes('SUGHRAN')
+  ) {
+    return 'F';
+  }
+  return 'M';
+}
+
+function getPaxCategory(pax) {
+  const pfx = (pax?.prefix || '').toUpperCase();
+  const name = (pax?.name || '').toUpperCase();
+  if (pfx.startsWith('INF') || name.includes('/INF')) return 'Infant';
+  if (pfx.startsWith('CHD') || pfx === 'CHILD' || pfx === 'MSTR' || name.includes('/CHD') || name.includes('MSTR')) return 'Child';
+  return 'Adult';
+}
+
 export default function VoucherView({ voucher, origin = '' }) {
   if (!voucher) return null;
   const { isAdmin } = useAuth();
@@ -139,8 +168,8 @@ export default function VoucherView({ voucher, origin = '' }) {
       <div className="grid grid-cols-1 sm:grid-cols-12 bg-[#f8fafc] border border-slate-300 rounded mt-3 py-2 sm:py-1.5 px-3 text-[11px] items-center gap-1.5 sm:gap-0 text-center sm:text-left">
         <div className="sm:col-span-6 flex items-center justify-center sm:justify-start gap-2">
           <span className="font-bold text-slate-600">Family Head:</span>
-          <span className="font-extrabold text-[#0a192f] uppercase text-xs">
-            {voucher.party || 'MUHAMMAD INSHAL SYED'}
+          <span className="font-extrabold text-[#0a192f] uppercase text-xs tracking-wide">
+            {formatDisplayName(voucher.party || 'MUHAMMAD INSHAL SYED')}
           </span>
         </div>
         <div className="sm:col-span-3 flex items-center justify-center sm:justify-start gap-1.5">
@@ -187,17 +216,17 @@ export default function VoucherView({ voucher, origin = '' }) {
                   <td className="border border-slate-300 py-1.5 px-2 text-center font-bold text-slate-600">
                     {pax.sNo || i + 1}
                   </td>
-                  <td className="border border-slate-300 py-1.5 px-3 font-mono font-bold text-[#0a192f]">
-                    {pax.passportNo || '—'}
+                  <td className="border border-slate-300 py-1.5 px-3 font-mono font-bold text-[#0a192f] uppercase">
+                    {(pax.passportNo || '—').toUpperCase()}
                   </td>
-                  <td className="border border-slate-300 py-1.5 px-4 font-bold text-slate-900">
-                    {pax.name}
+                  <td className="border border-slate-300 py-1.5 px-4 font-bold text-slate-900 uppercase">
+                    {formatDisplayName(pax.name)}
                   </td>
                   <td className="border border-slate-300 py-1.5 px-2 text-center font-bold text-slate-700">
-                    {pax.name?.includes('/MRS') || pax.name?.includes('BEGUM') || pax.name?.includes('PARVEEN') || pax.name?.includes('MISS') ? 'F' : 'M'}
+                    {getGender(pax)}
                   </td>
-                  <td className="border border-slate-300 py-1.5 px-2 text-center text-slate-700">
-                    Adult
+                  <td className="border border-slate-300 py-1.5 px-2 text-center font-medium text-slate-700">
+                    {getPaxCategory(pax)}
                   </td>
                   <td className="border border-slate-300 py-1.5 px-2 text-center font-bold text-emerald-700">
                     Yes

@@ -236,38 +236,31 @@ export default function EditVoucherPage() {
 
     setIsSubmitting(true);
 
+    const cleanParty = party.trim().replace(/(\s*\/\s*(MR|MRS|MS|MISS|CHD|INF|MSTR|MASTER|CHILD|INFANT|LADY|GENT))+\s*$/gi, '').trim().replace(/\s*\/+\s*$/g, '').trim().toUpperCase();
+
     const processedPassengers = passengers.map((p, idx) => {
       let name = (p.name || '').trim();
-      const upper = name.toUpperCase();
-      const hasPrefixTag = upper.includes('/MR') || upper.includes('/MRS') || upper.includes('/MS') || upper.includes('/MISS') || upper.includes('/CHD') || upper.includes('/INF') || upper.includes('/MSTR');
-      if (name && !hasPrefixTag && p.prefix) {
-        let tag = 'MR';
-        if (p.prefix === 'MRS') tag = 'MRS';
-        else if (p.prefix === 'MS') tag = 'MS';
-        else if (p.prefix === 'CHD_MSTR') tag = 'CHD / MSTR';
-        else if (p.prefix === 'CHD_MISS') tag = 'CHD / MISS';
-        else if (p.prefix === 'INF_MSTR') tag = 'INF / MSTR';
-        else if (p.prefix === 'INF_MISS') tag = 'INF / MISS';
-        name = `${name} / ${tag}`;
-      }
+      name = name.replace(/(\s*\/\s*(MR|MRS|MS|MISS|CHD|INF|MSTR|MASTER|CHILD|INFANT|LADY|GENT))+\s*$/gi, '').trim();
+      name = name.replace(/\s*\/+\s*$/g, '').trim().toUpperCase();
       return {
         ...p,
         sNo: (idx + 1).toString(),
         name,
+        passportNo: (p.passportNo || '').trim().toUpperCase(),
       };
     });
 
     const updatedData = {
       ...voucher,
       companyName,
-      party: party.trim(),
+      party: cleanParty,
       ubNumber: ubNumber.trim(),
       voucherRefNo: ubNumber.trim(),
       groundTransport: groundTransport.trim(),
       makkahHelpline: makkahHelpline.trim(),
       madinahHelpline: madinahHelpline.trim(),
       pakistanHelpline: pakistanHelpline.trim(),
-      slug: voucher.slug || slugify(party),
+      slug: voucher.slug || slugify(cleanParty),
       executive,
       paxCounts,
       totalPax: processedPassengers.length,

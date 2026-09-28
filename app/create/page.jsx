@@ -180,39 +180,31 @@ export default function CreateVoucherPage() {
     }
 
     setIsSubmitting(true);
-    const partySlug = slugify(party) || 'voucher-' + Date.now();
+    const cleanParty = party.trim().replace(/(\s*\/\s*(MR|MRS|MS|MISS|CHD|INF|MSTR|MASTER|CHILD|INFANT|LADY|GENT))+\s*$/gi, '').trim().replace(/\s*\/+\s*$/g, '').trim().toUpperCase();
+    const partySlug = slugify(cleanParty) || 'voucher-' + Date.now();
 
     const formattedPassengers = passengers
       .filter((p) => p.name.trim() !== '')
       .map((p, idx) => {
         let fullName = p.name.trim();
-        const upper = fullName.toUpperCase();
-        const hasPrefixTag = upper.includes('/MR') || upper.includes('/MRS') || upper.includes('/MS') || upper.includes('/MISS') || upper.includes('/CHD') || upper.includes('/INF') || upper.includes('/MSTR');
-        if (fullName && !hasPrefixTag && p.prefix) {
-          let tag = 'MR';
-          if (p.prefix === 'MRS') tag = 'MRS';
-          else if (p.prefix === 'MS') tag = 'MS';
-          else if (p.prefix === 'CHD_MSTR') tag = 'CHD / MSTR';
-          else if (p.prefix === 'CHD_MISS') tag = 'CHD / MISS';
-          else if (p.prefix === 'INF_MSTR') tag = 'INF / MSTR';
-          else if (p.prefix === 'INF_MISS') tag = 'INF / MISS';
-          fullName = `${fullName} / ${tag}`;
-        }
+        fullName = fullName.replace(/(\s*\/\s*(MR|MRS|MS|MISS|CHD|INF|MSTR|MASTER|CHILD|INFANT|LADY|GENT))+\s*$/gi, '').trim();
+        fullName = fullName.replace(/\s*\/+\s*$/g, '').trim().toUpperCase();
         return {
           ...p,
           sNo: (idx + 1).toString(),
           name: fullName,
+          passportNo: (p.passportNo || '').trim().toUpperCase(),
         };
       });
 
     const newVoucher = {
       id: 'custom-' + Date.now(),
-      sheetName: `Voucher - ${party}`,
+      sheetName: `Voucher - ${cleanParty}`,
       companyName,
       emergencyContact,
       phone,
       voucherTitle: 'UMRAH PACKAGE VOUCHER',
-      party: party.trim(),
+      party: cleanParty,
       ubNumber: ubNumber.trim(),
       voucherRefNo: ubNumber.trim(),
       groundTransport: groundTransport.trim(),
