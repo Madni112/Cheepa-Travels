@@ -232,7 +232,7 @@ export default function VoucherView({ voucher, origin = '' }) {
                     Yes
                   </td>
                   <td className="border border-slate-300 py-1.5 px-3 text-center font-mono text-slate-600">
-                    {pax.group || '480900760934'}
+                    {pax.group || '-'}
                   </td>
                   <td className="border border-slate-300 py-1.5 px-2 text-center font-mono text-slate-600">
                     {pax.visaNo || '-'}
