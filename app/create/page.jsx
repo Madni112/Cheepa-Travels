@@ -184,14 +184,23 @@ export default function CreateVoucherPage() {
 
     const formattedPassengers = passengers
       .filter((p) => p.name.trim() !== '')
-      .map((p) => {
+      .map((p, idx) => {
         let fullName = p.name.trim();
-        const pfx = (p.prefix || 'MR').toUpperCase();
-        if (!fullName.includes('/') && pfx) {
-          fullName = `${fullName} / ${pfx}`;
+        const upper = fullName.toUpperCase();
+        const hasPrefixTag = upper.includes('/MR') || upper.includes('/MRS') || upper.includes('/MS') || upper.includes('/MISS') || upper.includes('/CHD') || upper.includes('/INF') || upper.includes('/MSTR');
+        if (fullName && !hasPrefixTag && p.prefix) {
+          let tag = 'MR';
+          if (p.prefix === 'MRS') tag = 'MRS';
+          else if (p.prefix === 'MS') tag = 'MS';
+          else if (p.prefix === 'CHD_MSTR') tag = 'CHD / MSTR';
+          else if (p.prefix === 'CHD_MISS') tag = 'CHD / MISS';
+          else if (p.prefix === 'INF_MSTR') tag = 'INF / MSTR';
+          else if (p.prefix === 'INF_MISS') tag = 'INF / MISS';
+          fullName = `${fullName} / ${tag}`;
         }
         return {
           ...p,
+          sNo: (idx + 1).toString(),
           name: fullName,
         };
       });
@@ -368,9 +377,10 @@ export default function CreateVoucherPage() {
                 </label>
                 <input
                   type="text"
+                  readOnly
                   value={paxCounts}
-                  onChange={(e) => setPaxCounts(e.target.value)}
-                  className="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 font-semibold text-slate-800"
+                  className="w-full px-3.5 py-2 text-sm bg-slate-100 border border-slate-300 rounded-xl font-bold text-slate-800 cursor-not-allowed select-none focus:outline-none"
+                  title="PAX Summary is automatically calculated based on passengers and prefix selections"
                 />
               </div>
             </div>
@@ -402,14 +412,16 @@ export default function CreateVoucherPage() {
                   <select
                     value={pax.prefix || 'MR'}
                     onChange={(e) => updatePassenger(idx, 'prefix', e.target.value)}
-                    className="w-24 px-2 py-1.5 text-xs bg-white border border-slate-300 rounded-lg font-bold text-emerald-950 focus:ring-2 focus:ring-emerald-500 shadow-xs"
-                    title="Select Prefix / Title (Mr, Mrs, Miss, Child, Infant)"
+                    className="w-36 px-2 py-1.5 text-xs bg-white border border-slate-300 rounded-lg font-bold text-emerald-950 focus:ring-2 focus:ring-emerald-500 shadow-xs"
+                    title="Select Prefix / Title"
                   >
-                    <option value="MR">MR (Gent)</option>
-                    <option value="MRS">MRS (Lady)</option>
-                    <option value="MISS">MISS (Lady)</option>
-                    <option value="CHILD">CHD (Child)</option>
-                    <option value="INFANT">INF (Infant)</option>
+                    <option value="MR">Adult (Mr)</option>
+                    <option value="MRS">Adult (Mrs)</option>
+                    <option value="MS">Adult (Ms)</option>
+                    <option value="CHD_MSTR">Child (Mstr)</option>
+                    <option value="CHD_MISS">Child (Miss)</option>
+                    <option value="INF_MSTR">Infant (Master)</option>
+                    <option value="INF_MISS">Infant (Miss)</option>
                   </select>
                   <input
                     type="text"

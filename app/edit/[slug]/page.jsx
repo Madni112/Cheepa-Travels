@@ -70,12 +70,14 @@ export default function EditVoucherPage() {
             const upper = cleanName.toUpperCase();
             if (upper.includes('/MRS') || upper.includes('/LADY') || upper.includes('MRS.') || upper.includes('BEGUM') || upper.includes('PARVEEN') || upper.includes('BIBI') || upper.includes('KHATOON') || upper.includes('FATIMA')) {
               pfx = 'MRS';
+            } else if (upper.includes('/MS')) {
+              pfx = 'MS';
             } else if (upper.includes('/MISS') || upper.includes('MISS.')) {
-              pfx = 'MISS';
+              pfx = 'CHD_MISS';
             } else if (upper.includes('/CHD') || upper.includes('/CHILD') || upper.includes('MSTR')) {
-              pfx = 'CHILD';
+              pfx = 'CHD_MSTR';
             } else if (upper.includes('/INF') || upper.includes('/INFANT')) {
-              pfx = 'INFANT';
+              pfx = 'INF_MSTR';
             } else if (upper.includes('/MR') || upper.includes('MR.')) {
               pfx = 'MR';
             }
@@ -91,7 +93,7 @@ export default function EditVoucherPage() {
         });
 
         setPassengers(loadedPassengers);
-        setPaxCounts(found.paxCounts || computePaxSummary(loadedPassengers));
+        setPaxCounts(computePaxSummary(loadedPassengers));
 
         setAccommodations(found.accommodations && found.accommodations.length > 0 ? found.accommodations : [
           { city: 'MAKKAH', hotelCode: '378', hotelName: '', roomType: 'DOUBLE', checkIn: '', checkOut: '', nights: '5' }
@@ -237,9 +239,15 @@ export default function EditVoucherPage() {
     const processedPassengers = passengers.map((p, idx) => {
       let name = (p.name || '').trim();
       const upper = name.toUpperCase();
-      const hasPrefixTag = upper.includes('/MR') || upper.includes('/MRS') || upper.includes('/MISS') || upper.includes('/CHD') || upper.includes('/INF');
+      const hasPrefixTag = upper.includes('/MR') || upper.includes('/MRS') || upper.includes('/MS') || upper.includes('/MISS') || upper.includes('/CHD') || upper.includes('/INF') || upper.includes('/MSTR');
       if (name && !hasPrefixTag && p.prefix) {
-        const tag = p.prefix === 'CHILD' ? 'CHD' : p.prefix === 'INFANT' ? 'INF' : p.prefix;
+        let tag = 'MR';
+        if (p.prefix === 'MRS') tag = 'MRS';
+        else if (p.prefix === 'MS') tag = 'MS';
+        else if (p.prefix === 'CHD_MSTR') tag = 'CHD / MSTR';
+        else if (p.prefix === 'CHD_MISS') tag = 'CHD / MISS';
+        else if (p.prefix === 'INF_MSTR') tag = 'INF / MSTR';
+        else if (p.prefix === 'INF_MISS') tag = 'INF / MISS';
         name = `${name} / ${tag}`;
       }
       return {
@@ -369,9 +377,10 @@ export default function EditVoucherPage() {
                 </label>
                 <input 
                   type="text"
+                  readOnly
                   value={paxCounts}
-                  onChange={(e) => setPaxCounts(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none font-semibold text-slate-800 bg-slate-50"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg font-bold text-slate-800 bg-slate-100 cursor-not-allowed select-none focus:outline-none"
+                  title="PAX Summary is automatically calculated based on passengers and prefix selections"
                 />
               </div>
             </div>
@@ -465,14 +474,16 @@ export default function EditVoucherPage() {
                   <select
                     value={pax.prefix || 'MR'}
                     onChange={(e) => updatePassenger(idx, 'prefix', e.target.value)}
-                    className="w-28 px-2 py-1.5 text-xs bg-white border border-slate-300 rounded-lg font-bold text-emerald-950 focus:ring-2 focus:ring-emerald-500 shadow-xs"
+                    className="w-36 px-2 py-1.5 text-xs bg-white border border-slate-300 rounded-lg font-bold text-emerald-950 focus:ring-2 focus:ring-emerald-500 shadow-xs"
                     title="Select Prefix / Title"
                   >
-                    <option value="MR">MR (Gent)</option>
-                    <option value="MRS">MRS (Lady)</option>
-                    <option value="MISS">MISS (Lady)</option>
-                    <option value="CHILD">CHD (Child)</option>
-                    <option value="INFANT">INF (Infant)</option>
+                    <option value="MR">Adult (Mr)</option>
+                    <option value="MRS">Adult (Mrs)</option>
+                    <option value="MS">Adult (Ms)</option>
+                    <option value="CHD_MSTR">Child (Mstr)</option>
+                    <option value="CHD_MISS">Child (Miss)</option>
+                    <option value="INF_MSTR">Infant (Master)</option>
+                    <option value="INF_MISS">Infant (Miss)</option>
                   </select>
                   <input 
                     type="text"
