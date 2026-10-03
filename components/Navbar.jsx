@@ -54,8 +54,7 @@ export default function Navbar() {
                   }`}
                 >
                   <Layers className="w-4 h-4 text-amber-400" />
-                  <span className="hidden sm:inline">All Vouchers (12)</span>
-                  <span className="sm:hidden">All (12)</span>
+                  <span>Vouchers</span>
                 </Link>
 
                 <Link
