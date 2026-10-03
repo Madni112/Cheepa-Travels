@@ -18,14 +18,12 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           {/* Brand */}
           <Link href={isAdmin ? '/' : pathname} className="flex items-center gap-3 group">
-            <div className="bg-white p-1 rounded-xl shadow-xs border border-white/20 flex items-center justify-center">
-              <Image 
-                src={whiteLogo} 
-                alt="Cheepa FJ Travels Logo" 
-                className="h-9 w-auto object-contain"
-                priority
-              />
-            </div>
+            <Image 
+              src={whiteLogo} 
+              alt="Cheepa FJ Travels Logo" 
+              className="h-10 w-auto object-contain drop-shadow" 
+              priority
+            />
             <div>
               <div className="flex items-center gap-2">
                 <span className="font-heading font-bold text-lg tracking-wide text-white group-hover:text-amber-300 transition-colors">
