@@ -95,13 +95,13 @@ export default function HomePage() {
             <div className="space-y-2 max-w-2xl">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-800/80 text-amber-300 text-xs font-semibold border border-amber-400/20 backdrop-blur-sm">
                 <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                <span>Next.js QR Code Voucher Portal</span>
+                <span>Cheepa FJ Travels Portal</span>
               </div>
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold font-heading tracking-tight text-white">
                 Umrah Package Vouchers &amp; QR Verification
               </h1>
               <p className="text-emerald-200/90 text-sm sm:text-base leading-relaxed">
-                Complete digitised records for all <strong>12 vouchers</strong> from <span className="text-amber-300 font-medium">Book1.xlsx</span>. Each voucher is linked with dynamic live QR codes for instant mobile viewing and print handover.
+                Complete digitised Umrah vouchers for <strong>Cheepa FJ Travels</strong>. Each voucher is linked with dynamic live QR codes for instant mobile viewing and print handover.
               </p>
             </div>
 
@@ -182,12 +182,12 @@ export default function HomePage() {
                         <span className="text-[11px] font-bold font-mono px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200/80">
                           {ubBadge}
                         </span>
-                        <span className="text-xs text-slate-400 font-medium truncate max-w-[140px]">
-                          {voucher.sheetName}
+                        <span className="text-[11px] text-slate-400 font-semibold uppercase tracking-wider truncate max-w-[140px]">
+                          CHEEPA FJ
                         </span>
                       </div>
-                      <h3 className="font-heading font-bold text-slate-900 text-lg group-hover:text-emerald-800 transition-colors mt-1 truncate max-w-[200px]">
-                        {voucher.party}
+                      <h3 className="font-heading font-bold text-slate-900 text-base sm:text-lg group-hover:text-emerald-800 transition-colors mt-1 uppercase truncate max-w-[200px]">
+                        {(voucher.party || '').replace(/(\s*\/\s*(MR|MRS|MS|MISS|CHD|INF|MSTR|MASTER|CHILD|INFANT|LADY|GENT))+\s*$/gi, '').replace(/\s*\(8\)$/i, '').trim().toUpperCase()}
                       </h3>
                     </div>
 
