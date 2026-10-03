@@ -107,7 +107,7 @@ export default function VoucherView({ voucher, origin = '' }) {
         <div className="space-y-1.5 flex-[1.3] text-center sm:text-left shrink-0 order-2 sm:order-1">
           <div>
             <h1 className="text-[13.5px] sm:text-[14.5px] print:text-[12.5pt] font-extrabold tracking-tight text-[#0a192f] uppercase sm:whitespace-nowrap">
-              {voucher.companyName || 'CHEEPA TRAVELS'}
+              {voucher.companyName || 'CHEEPA FJ TRAVELS'}
             </h1>
             <p className="text-[10px] text-slate-500 font-semibold tracking-wide">
               Official Umrah Voucher Portal
@@ -636,7 +636,7 @@ export default function VoucherView({ voucher, origin = '' }) {
         {/* Agency Contact & Address Footer */}
         <div className="border-t border-slate-300 pt-1.5 text-center text-[9px] print:text-[7.5pt] text-slate-700 bg-slate-50/80 rounded py-1 px-2">
           <p className="font-extrabold text-[#0a192f] uppercase tracking-wide">
-            {voucher.companyName || 'CHEEPA TRAVELS'}
+            {voucher.companyName || 'CHEEPA FJ TRAVELS'}
           </p>
           <p className="font-mono font-bold text-slate-800 mt-0.5">
             {voucher.address || voucher.phone || 'MUHAMMAD FAIZAN 03112324764  G.MURTAZA (HAJI) 0312360 8683'}
