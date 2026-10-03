@@ -35,9 +35,9 @@ export default function EditVoucherPage() {
   const [groundTransport, setGroundTransport] = useState('+92 328 8189989');
   const [makkahHelpline, setMakkahHelpline] = useState('+966 53 649 2846');
   const [madinahHelpline, setMadinahHelpline] = useState('+966 57 593 0550');
-  const [pakistanHelpline, setPakistanHelpline] = useState('+92 311 2264567');
-  const [companyName, setCompanyName] = useState('NOOR E HARAM TRAVEL & TOURS');
-  const [executive, setExecutive] = useState('ADMIN');
+  const [pakistanHelpline, setPakistanHelpline] = useState('MUHAMMAD FAIZAN 03112324764 / G.MURTAZA (HAJI) 0312360 8683');
+  const [companyName, setCompanyName] = useState('CHEEPA TRAVELS');
+  const [executive, setExecutive] = useState('MUHAMMAD FAIZAN');
   const [paxCounts, setPaxCounts] = useState('GENT(S): 1  LAD(IES): 0  CHILD(REN): 0  INFANT(S): 0');
   const [passengers, setPassengers] = useState([]);
   const [accommodations, setAccommodations] = useState([]);
@@ -57,9 +57,9 @@ export default function EditVoucherPage() {
         setGroundTransport(found.groundTransport || found.ksaGroundTransport || '+92 328 8189989');
         setMakkahHelpline(found.makkahHelpline || found.ksaMakkah || '+966 53 649 2846');
         setMadinahHelpline(found.madinahHelpline || found.ksaMadinah || '+966 57 593 0550');
-        setPakistanHelpline(found.pakistanHelpline || '+92 311 2264567');
-        setCompanyName(found.companyName || 'NOOR E HARAM TRAVEL & TOURS');
-        setExecutive(found.executive || 'ADMIN');
+        setPakistanHelpline(found.pakistanHelpline || 'MUHAMMAD FAIZAN 03112324764 / G.MURTAZA (HAJI) 0312360 8683');
+        setCompanyName(found.companyName || 'CHEEPA TRAVELS');
+        setExecutive(found.executive || 'MUHAMMAD FAIZAN');
 
         const loadedPassengers = (found.passengers && found.passengers.length > 0 ? found.passengers : [
           { sNo: '1', prefix: 'MR', name: '', passportNo: '', group: '', visaNo: '' }

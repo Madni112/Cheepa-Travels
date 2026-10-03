@@ -107,7 +107,7 @@ export default function VoucherView({ voucher, origin = '' }) {
         <div className="space-y-1.5 flex-[1.3] text-center sm:text-left shrink-0 order-2 sm:order-1">
           <div>
             <h1 className="text-[13.5px] sm:text-[14.5px] print:text-[12.5pt] font-extrabold tracking-tight text-[#0a192f] uppercase sm:whitespace-nowrap">
-              {voucher.companyName || 'NOOR E HARAM TRAVEL & TOURS'}
+              {voucher.companyName || 'CHEEPA TRAVELS'}
             </h1>
             <p className="text-[10px] text-slate-500 font-semibold tracking-wide">
               Official Umrah Voucher Portal
@@ -139,7 +139,7 @@ export default function VoucherView({ voucher, origin = '' }) {
         <div className="flex flex-col items-center justify-center text-center space-y-1.5 flex-[1.4] order-1 sm:order-2">
           <img 
             src="/logo.png" 
-            alt="Noor E Haram Logo" 
+            alt="Cheepa Travels Logo" 
             className="h-24 sm:h-36 max-w-[250px] sm:max-w-[300px] w-auto object-contain print:h-32 drop-shadow-sm transition-all" 
           />
           <div className="flex items-center gap-1.5">
@@ -554,8 +554,8 @@ export default function VoucherView({ voucher, origin = '' }) {
           <span className="text-[#805a1b] font-bold text-[9px] uppercase tracking-wider block print:text-[7.5pt]">
             PAKISTAN HELPLINE (24/7)
           </span>
-          <span className="text-[#0a192f] font-black text-sm font-mono tracking-tight print:text-[9.5pt]">
-            {voucher.pakistanHelpline || '+92 311 2264567'}
+          <span className="text-[#0a192f] font-black text-xs sm:text-[13px] font-mono tracking-tight print:text-[8.5pt]">
+            {voucher.pakistanHelpline || 'MUHAMMAD FAIZAN 03112324764 / G.MURTAZA (HAJI) 0312360 8683'}
           </span>
         </div>
 
@@ -631,6 +631,16 @@ export default function VoucherView({ voucher, origin = '' }) {
             <p>3. Distances noted are approximate and subject to on-ground traffic scenarios.</p>
             <p>7. Contact helpline at least 24h prior to avail bus transport.</p>
           </div>
+        </div>
+
+        {/* Agency Contact & Address Footer */}
+        <div className="border-t border-slate-300 pt-1.5 text-center text-[9px] print:text-[7.5pt] text-slate-700 bg-slate-50/80 rounded py-1 px-2">
+          <p className="font-extrabold text-[#0a192f] uppercase tracking-wide">
+            {voucher.companyName || 'CHEEPA TRAVELS'}
+          </p>
+          <p className="font-mono font-bold text-slate-800 mt-0.5">
+            {voucher.address || voucher.phone || 'MUHAMMAD FAIZAN 03112324764  G.MURTAZA (HAJI) 0312360 8683'}
+          </p>
         </div>
       </div>
 

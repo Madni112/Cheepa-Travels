@@ -25,16 +25,16 @@ export default function CreateVoucherPage() {
   const router = useRouter();
   const { isAdmin, isLoaded } = useAuth();
 
-  const [companyName, setCompanyName] = useState('NOOR E HARAM TRAVEL & TOURS');
-  const [phone, setPhone] = useState('Mob : UBAID RAZA +92-311-2264567 / +92-348-3138424');
+  const [companyName, setCompanyName] = useState('CHEEPA TRAVELS');
+  const [phone, setPhone] = useState('MUHAMMAD FAIZAN 03112324764 / G.MURTAZA (HAJI) 0312360 8683');
   const [emergencyContact, setEmergencyContact] = useState('+966 50 627 7492');
   const [party, setParty] = useState('');
   const [ubNumber, setUbNumber] = useState('UB-0013');
   const [groundTransport, setGroundTransport] = useState('+92 328 8189989');
   const [makkahHelpline, setMakkahHelpline] = useState('+966 53 649 2846');
   const [madinahHelpline, setMadinahHelpline] = useState('+966 57 593 0550');
-  const [pakistanHelpline, setPakistanHelpline] = useState('+92 311 2264567');
-  const [executive, setExecutive] = useState('ADMIN');
+  const [pakistanHelpline, setPakistanHelpline] = useState('MUHAMMAD FAIZAN 03112324764 / G.MURTAZA (HAJI) 0312360 8683');
+  const [executive, setExecutive] = useState('MUHAMMAD FAIZAN');
   const [passengers, setPassengers] = useState([
     { sNo: '1', prefix: 'MR', name: '', passportNo: '', group: '', visaNo: '' },
   ]);
