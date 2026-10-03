@@ -40,6 +40,18 @@ export default function CreateVoucherPage() {
   ]);
   const [paxCounts, setPaxCounts] = useState('GENT(S): 1  LAD(IES): 0  CHILD(REN): 0  INFANT(S): 0');
 
+  const [accommodations, setAccommodations] = useState([
+    { city: 'MAKKAH', hotelCode: '378', hotelName: '', roomType: 'DOUBLE', checkIn: '', checkOut: '', nights: '5' },
+    { city: 'MADINAH', hotelCode: '378', hotelName: '', roomType: 'DOUBLE', checkIn: '', checkOut: '', nights: '5' },
+  ]);
+  const [transports, setTransports] = useState([
+    { sNo: '1', tnNo: '317', service: 'JED AIRPORT TO MAKKAH HOTEL', vehicle: 'BUS', pickupDate: '', contactPerson: '', bookingRefNo: '' },
+  ]);
+  const [flights, setFlights] = useState([
+    { pnr: '', date: '', flight: '', from: 'KHI', to: 'JED', departure: '', arrival: '' },
+  ]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   useEffect(() => {
     fetchSupabaseVouchers().then(list => {
       const all = list && list.length > 0 ? list : getAllVouchers();
@@ -71,21 +83,6 @@ export default function CreateVoucherPage() {
   if (!isAdmin) {
     return <AdminLoginForm />;
   }
-
-  const [accommodations, setAccommodations] = useState([
-    { city: 'MAKKAH', hotelCode: '378', hotelName: '', roomType: 'DOUBLE', checkIn: '', checkOut: '', nights: '5' },
-    { city: 'MADINAH', hotelCode: '378', hotelName: '', roomType: 'DOUBLE', checkIn: '', checkOut: '', nights: '5' },
-  ]);
-
-  const [transports, setTransports] = useState([
-    { sNo: '1', tnNo: '317', service: 'JED AIRPORT TO MAKKAH HOTEL', vehicle: 'BUS', pickupDate: '', contactPerson: '', bookingRefNo: '' },
-  ]);
-
-  const [flights, setFlights] = useState([
-    { pnr: '', date: '', flight: '', from: 'KHI', to: 'JED', departure: '', arrival: '' },
-  ]);
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Add passenger row
   const addPassenger = () => {
