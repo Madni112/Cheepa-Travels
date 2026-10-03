@@ -27,7 +27,8 @@ import {
 
 export default function HomePage() {
   const { isAdmin, isLoaded } = useAuth();
-  const [vouchers, setVouchers] = useState(initialVouchers);
+  const [vouchers, setVouchers] = useState([]);
+  const [loadingVouchers, setLoadingVouchers] = useState(true);
   const [search, setSearch] = useState('');
   const [origin, setOrigin] = useState('');
   const [copiedId, setCopiedId] = useState(null);
@@ -35,13 +36,9 @@ export default function HomePage() {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setOrigin(window.location.origin);
-      const all = getAllVouchers();
-      setVouchers(all);
-
       fetchSupabaseVouchers().then((liveList) => {
-        if (liveList && liveList.length > 0) {
-          setVouchers(liveList);
-        }
+        setVouchers(liveList || []);
+        setLoadingVouchers(false);
       });
     }
   }, []);
@@ -267,15 +264,36 @@ export default function HomePage() {
           })}
         </div>
 
-        {filtered.length === 0 && (
-          <div className="bg-white rounded-2xl p-12 text-center border border-slate-200 space-y-3">
-            <p className="text-slate-500 text-base">No vouchers found matching "{search}"</p>
-            <button
-              onClick={() => setSearch('')}
-              className="text-xs text-emerald-700 font-semibold underline"
-            >
-              Clear Search Filter
-            </button>
+        {filtered.length === 0 && !loadingVouchers && (
+          <div className="bg-white rounded-2xl p-12 text-center border border-slate-200 space-y-4">
+            {search ? (
+              <>
+                <p className="text-slate-500 text-base">No vouchers found matching "{search}"</p>
+                <button
+                  onClick={() => setSearch('')}
+                  className="text-xs text-emerald-700 font-semibold underline"
+                >
+                  Clear Search Filter
+                </button>
+              </>
+            ) : (
+              <>
+                <div className="w-12 h-12 rounded-full bg-emerald-50 text-emerald-700 flex items-center justify-center mx-auto">
+                  <PlusCircle className="w-6 h-6" />
+                </div>
+                <div className="space-y-1">
+                  <h3 className="font-bold text-slate-800 text-lg">No Vouchers in Cheepa FJ Travels Portal Yet</h3>
+                  <p className="text-slate-500 text-xs sm:text-sm">Get started by creating your first digital Umrah package voucher.</p>
+                </div>
+                <Link
+                  href="/create"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-md transition-all"
+                >
+                  <PlusCircle className="w-4 h-4" />
+                  <span>Create First Voucher</span>
+                </Link>
+              </>
+            )}
           </div>
         )}
 
