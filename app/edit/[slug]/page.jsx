@@ -35,7 +35,7 @@ export default function EditVoucherPage() {
   const [groundTransport, setGroundTransport] = useState('+92 328 8189989');
   const [makkahHelpline, setMakkahHelpline] = useState('+966 53 649 2846');
   const [madinahHelpline, setMadinahHelpline] = useState('+966 57 593 0550');
-  const [pakistanHelpline, setPakistanHelpline] = useState('MUHAMMAD FAIZAN 03112324764 / G.MURTAZA (HAJI) 0312360 8683');
+  const [pakistanHelpline, setPakistanHelpline] = useState('MUHAMMAD FAIZAN 0311-2324764 / G.MURTAZA (HAJI) 0312-3608683');
   const [companyName, setCompanyName] = useState('CHEEPA FJ TRAVELS');
   const [executive, setExecutive] = useState('MUHAMMAD FAIZAN');
   const [isSelfVisa, setIsSelfVisa] = useState(true);
@@ -58,7 +58,7 @@ export default function EditVoucherPage() {
         setGroundTransport(found.groundTransport || found.ksaGroundTransport || '+92 328 8189989');
         setMakkahHelpline(found.makkahHelpline || found.ksaMakkah || '+966 53 649 2846');
         setMadinahHelpline(found.madinahHelpline || found.ksaMadinah || '+966 57 593 0550');
-        setPakistanHelpline(found.pakistanHelpline || 'MUHAMMAD FAIZAN 03112324764 / G.MURTAZA (HAJI) 0312360 8683');
+        setPakistanHelpline(found.pakistanHelpline || 'MUHAMMAD FAIZAN 0311-2324764 / G.MURTAZA (HAJI) 0312-3608683');
         setCompanyName(found.companyName || 'CHEEPA FJ TRAVELS');
         setExecutive(found.executive || 'MUHAMMAD FAIZAN');
         setIsSelfVisa(found.isSelfVisa !== false);

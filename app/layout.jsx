@@ -19,7 +19,7 @@ export default function RootLayout({ children }) {
           <footer className="bg-emerald-950 text-emerald-300/80 py-6 border-t border-emerald-900 text-xs text-center no-print">
             <div className="max-w-7xl mx-auto px-4 space-y-1">
               <p className="font-semibold text-emerald-100">CHEEPA FJ TRAVELS • UMRAH VOUCHER MANAGEMENT SYSTEM</p>
-              <p className="text-emerald-400/60">MUHAMMAD FAIZAN 03112324764 | G.MURTAZA (HAJI) 0312360 8683</p>
+              <p className="text-emerald-400/60">MUHAMMAD FAIZAN 0311-2324764 | G.MURTAZA (HAJI) 0312-3608683</p>
             </div>
           </footer>
         </AuthProvider>
