@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '../lib/AuthContext';
-import { Compass, PlusCircle, Layers, Lock, LogOut, ShieldCheck } from 'lucide-react';
+import { Compass, PlusCircle, Layers, Lock, LogOut, ShieldCheck, Building2 } from 'lucide-react';
 
 import whiteLogo from './White-Logo.png';
 import Image from 'next/image';
@@ -53,6 +53,18 @@ export default function Navbar() {
                 >
                   <Layers className="w-4 h-4 text-amber-400" />
                   <span>Vouchers</span>
+                </Link>
+
+                <Link
+                  href="/erp"
+                  className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-bold transition-all ${
+                    pathname.startsWith('/erp')
+                      ? 'bg-amber-400 text-emerald-950 shadow-md ring-1 ring-amber-300'
+                      : 'text-amber-300 hover:text-white hover:bg-emerald-900/60 border border-amber-400/30'
+                  }`}
+                >
+                  <Building2 className="w-4 h-4 text-amber-400" />
+                  <span>ERP Portal</span>
                 </Link>
 
                 <Link

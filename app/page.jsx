@@ -105,11 +105,19 @@ export default function HomePage() {
             {/* Quick Actions */}
             <div className="flex flex-wrap items-center gap-3">
               <Link
+                href="/erp"
+                className="flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-emerald-950 font-black text-sm shadow-lg hover:shadow-amber-500/25 transition-all"
+              >
+                <Building2 className="w-5 h-5 stroke-[2.2]" />
+                <span>Launch ERP Portal</span>
+              </Link>
+
+              <Link
                 href="/create"
-                className="flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-emerald-950 font-bold text-sm shadow-lg hover:shadow-amber-500/25 transition-all"
+                className="flex items-center gap-2 px-4 py-3 rounded-xl bg-emerald-800/90 hover:bg-emerald-700 text-white font-bold text-sm border border-emerald-600/50 shadow transition-all"
               >
                 <PlusCircle className="w-5 h-5 stroke-[2.2]" />
-                <span>Create New Voucher</span>
+                <span>New Voucher</span>
               </Link>
             </div>
           </div>
