@@ -5,8 +5,8 @@ import { usePathname } from 'next/navigation';
 export default function Footer() {
   const pathname = usePathname();
 
-  // Hide global website footer on ERP Portal for full-screen dedicated SaaS experience
-  if (pathname && pathname.startsWith('/erp')) {
+  // Hide global website footer on ERP Portal and hotel-voucher for dedicated view experience
+  if (pathname && (pathname.startsWith('/erp') || pathname.startsWith('/hotel-voucher'))) {
     return null;
   }
 

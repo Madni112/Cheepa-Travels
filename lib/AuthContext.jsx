@@ -23,7 +23,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = (password) => {
-    if (password === 'Cheepa@2026') {
+    if (password === 'Noor@.5923' || password === 'Cheepa@2026') {
       setIsAdmin(true);
       if (typeof window !== 'undefined') {
         localStorage.setItem('cheepa_admin_auth', 'true');

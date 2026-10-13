@@ -12,8 +12,8 @@ export default function Navbar() {
   const pathname = usePathname();
   const { isAdmin, logout } = useAuth();
 
-  // If inside ERP Portal, let the dedicated Left Sidebar ERP layout manage its own header
-  if (pathname && pathname.startsWith('/erp')) {
+  // If inside ERP Portal or Hotel Voucher View, let the dedicated layout manage its own header
+  if (pathname && (pathname.startsWith('/erp') || pathname.startsWith('/hotel-voucher'))) {
     return null;
   }
 
