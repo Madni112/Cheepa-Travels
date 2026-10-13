@@ -12,6 +12,11 @@ export default function Navbar() {
   const pathname = usePathname();
   const { isAdmin, logout } = useAuth();
 
+  // If inside ERP Portal, let the dedicated Left Sidebar ERP layout manage its own header
+  if (pathname && pathname.startsWith('/erp')) {
+    return null;
+  }
+
   return (
     <header className="sticky top-0 z-50 bg-emerald-950/90 backdrop-blur-md border-b border-emerald-800/40 text-white no-print">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
