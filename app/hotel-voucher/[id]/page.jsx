@@ -687,6 +687,11 @@ export default function HotelVoucherViewPage() {
                         }`}>
                           {stay.hotelName}
                         </h4>
+                        {stay.view && (
+                          <span className="text-slate-500 font-medium text-[9px] print:text-[8pt] block">
+                            {stay.view}
+                          </span>
+                        )}
                         {stay.distance && (
                           <span className={`text-slate-600 font-semibold flex items-center gap-1 ${
                             isThreeOrMore ? 'text-[9px] print:text-[8pt]' : 'text-[10px] print:text-[8.5pt]'
