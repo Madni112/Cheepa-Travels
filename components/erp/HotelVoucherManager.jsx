@@ -27,10 +27,16 @@ import {
   Sparkles,
   Crown,
   PhoneCall,
-  Star
+  Star,
+  Lock,
+  KeyRound,
+  AlertCircle,
+  Save
 } from 'lucide-react';
 import { 
   saveHotelVoucher,
+  deleteHotelVoucher,
+  getAllHotelVouchers,
   getRegisteredHotels,
   addRegisteredHotel,
   updateRegisteredHotel,
@@ -39,8 +45,11 @@ import {
   getRegisteredHotelStars,
   saveRegisteredHotelStar,
   getRegisteredRoomTypes,
-  addRegisteredRoomType
+  addRegisteredRoomType,
+  getHotelDistance,
+  saveRegisteredHotelDistance
 } from '../../lib/erpData';
+import CustomDatePicker from './CustomDatePicker';
 
 // -------------------------------------------------------------
 // ROOM TYPE SELECTOR WITH PERSISTENT '+ ADD NEW' SUPPORT
@@ -123,265 +132,7 @@ function RoomTypeSelect({ value, onChange }) {
   );
 }
 
-// -------------------------------------------------------------
-// SMART HOTEL COMBOBOX DROPDOWN (Zohaib Ali Category Dropdown Pattern)
-// Features: Searchable input + Inline Edit + Inline Delete + "+ Add New"
-// -------------------------------------------------------------
-function HotelCombobox({ 
-  city, 
-  value, 
-  onChange, 
-  placeholder = 'Select or type hotel name...' 
-}) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [inputVal, setInputVal] = useState(value || '');
-  const [editingHotel, setEditingHotel] = useState(null);
-  const [editInput, setEditInput] = useState('');
-  const [registry, setRegistry] = useState(() => getRegisteredHotels());
-  const dropdownRef = useRef(null);
-  const inputRef = useRef(null);
-
-  // Sync internal input with prop value
-  useEffect(() => {
-    setInputVal(value || '');
-  }, [value]);
-
-  // Reload registry when city changes
-  useEffect(() => {
-    setRegistry(getRegisteredHotels());
-  }, [city]);
-
-  // Click outside to close dropdown
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setIsOpen(false);
-        setEditingHotel(null);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const cityKey = normalizeCityKey(city);
-  const cityHotels = registry[cityKey] || [];
-  const filteredHotels = cityHotels.filter(h => 
-    (h || '').toLowerCase().includes((inputVal || '').toLowerCase().trim())
-  );
-
-  const isExactMatch = cityHotels.some(h => 
-    h.toLowerCase().trim() === (inputVal || '').toLowerCase().trim()
-  );
-
-  const handleSelect = (hotelName) => {
-    setInputVal(hotelName);
-    onChange(hotelName);
-    setIsOpen(false);
-    setEditingHotel(null);
-  };
-
-  const handleAddNew = (hotelName) => {
-    const clean = (hotelName || '').trim().toUpperCase();
-    if (!clean) return;
-    const updated = addRegisteredHotel(city, clean);
-    setRegistry(updated);
-    setInputVal(clean);
-    onChange(clean);
-    setIsOpen(false);
-  };
-
-  const handleSaveEdit = (e, oldName) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const cleanNew = editInput.trim().toUpperCase();
-    if (!cleanNew) return;
-    const updated = updateRegisteredHotel(city, oldName, cleanNew);
-    setRegistry(updated);
-    if (value === oldName) {
-      setInputVal(cleanNew);
-      onChange(cleanNew);
-    }
-    setEditingHotel(null);
-    setEditInput('');
-  };
-
-  const handleDelete = (e, hotelToDelete) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (window.confirm(`Delete "${hotelToDelete}" from ${city} registered hotels list?`)) {
-      const updated = deleteRegisteredHotel(city, hotelToDelete);
-      setRegistry(updated);
-      if (value === hotelToDelete) {
-        setInputVal('');
-        onChange('');
-      }
-    }
-  };
-
-  return (
-    <div className="relative w-full" ref={dropdownRef}>
-      <div className="relative">
-        <input
-          ref={inputRef}
-          type="text"
-          value={inputVal}
-          onChange={(e) => {
-            setInputVal(e.target.value);
-            onChange(e.target.value);
-            setIsOpen(true);
-          }}
-          onFocus={() => setIsOpen(true)}
-          placeholder={placeholder}
-          className="w-full px-3 py-2 pr-14 border border-slate-300 rounded-xl bg-white text-slate-900 font-bold uppercase text-xs outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-800 transition-all shadow-2xs"
-        />
-
-        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
-          {inputVal && (
-            <button
-              type="button"
-              onClick={() => {
-                setInputVal('');
-                onChange('');
-                setIsOpen(true);
-                if (inputRef.current) inputRef.current.focus();
-              }}
-              className="p-1 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition-colors"
-              title="Clear"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          )}
-          <button
-            type="button"
-            onClick={() => setIsOpen(!isOpen)}
-            className="p-1 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition-colors"
-          >
-            <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-150 ${isOpen ? 'rotate-180 text-slate-700' : ''}`} />
-          </button>
-        </div>
-      </div>
-
-      {/* Popover Dropdown Panel */}
-      {isOpen && (
-        <div className="absolute left-0 right-0 top-full mt-1.5 bg-white border border-slate-200 rounded-2xl shadow-2xl z-[999] overflow-hidden animate-in fade-in zoom-in-95 duration-100 min-w-[280px] max-h-64 flex flex-col">
-          {/* Header */}
-          <div className="px-3 py-1.5 bg-slate-50 border-b border-slate-100 flex items-center justify-between text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-            <span>{city} Hotels ({cityHotels.length})</span>
-            <span className="text-slate-400 font-normal">Edit &amp; Delete available</span>
-          </div>
-
-          {/* List items */}
-          <div className="overflow-y-auto divide-y divide-slate-100 flex-1">
-            {filteredHotels.length > 0 ? (
-              filteredHotels.map((hItem) => {
-                const isSelected = value && value.trim().toUpperCase() === hItem.trim().toUpperCase();
-                const isEditingThis = editingHotel === hItem;
-
-                if (isEditingThis) {
-                  return (
-                    <div
-                      key={hItem}
-                      onMouseDown={(e) => e.stopPropagation()}
-                      className="p-2 bg-amber-50/90 border-l-4 border-amber-500 flex items-center gap-1.5"
-                    >
-                      <input
-                        type="text"
-                        autoFocus
-                        value={editInput}
-                        onChange={(e) => setEditInput(e.target.value)}
-                        onKeyDown={(e) => {
-                          e.stopPropagation();
-                          if (e.key === 'Enter') handleSaveEdit(e, hItem);
-                          else if (e.key === 'Escape') setEditingHotel(null);
-                        }}
-                        className="flex-1 min-w-0 px-2 py-1 text-xs font-bold uppercase rounded-lg border border-amber-400 bg-white text-slate-900 outline-none"
-                      />
-                      <button
-                        type="button"
-                        title="Save Changes"
-                        onClick={(e) => handleSaveEdit(e, hItem)}
-                        className="p-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white transition cursor-pointer shrink-0 shadow-2xs"
-                      >
-                        <Check className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        title="Cancel"
-                        onClick={() => setEditingHotel(null)}
-                        className="p-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 transition cursor-pointer shrink-0"
-                      >
-                        <X className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  );
-                }
-
-                return (
-                  <div
-                    key={hItem}
-                    onClick={() => handleSelect(hItem)}
-                    className={`p-2.5 px-3 cursor-pointer transition text-xs font-bold flex items-center justify-between group ${
-                      isSelected
-                        ? 'bg-emerald-50 text-emerald-950 border-l-4 border-emerald-600'
-                        : 'hover:bg-slate-50 text-slate-800'
-                    }`}
-                  >
-                    <span className="truncate mr-2 uppercase">{hItem}</span>
-
-                    <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
-                      {isSelected && (
-                        <span className="text-[10px] text-emerald-700 font-bold bg-emerald-100 px-2 py-0.5 rounded mr-1">
-                          Selected
-                        </span>
-                      )}
-                      <button
-                        type="button"
-                        title={`Edit "${hItem}"`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setEditingHotel(hItem);
-                          setEditInput(hItem);
-                        }}
-                        className="p-1 rounded-md text-slate-400 hover:text-emerald-700 hover:bg-emerald-50 transition cursor-pointer"
-                      >
-                        <Edit3 className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        title={`Delete "${hItem}"`}
-                        onClick={(e) => handleDelete(e, hItem)}
-                        className="p-1 rounded-md text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </div>
-                );
-              })
-            ) : null}
-
-            {/* + Add New Option if inputVal is not empty and not in the list */}
-            {inputVal.trim() && !isExactMatch && (
-              <div
-                onClick={() => handleAddNew(inputVal)}
-                className="p-3 text-center text-xs font-bold cursor-pointer border-t border-slate-100 bg-emerald-50/70 hover:bg-emerald-100/80 text-emerald-800 transition flex items-center justify-center gap-1.5"
-              >
-                <Plus className="w-4 h-4 text-emerald-700" />
-                <span>+ Add "{inputVal.trim().toUpperCase()}" to {city} Hotels</span>
-              </div>
-            )}
-
-            {filteredHotels.length === 0 && (!inputVal.trim() || isExactMatch) && (
-              <div className="p-4 text-center text-xs text-slate-400 italic">
-                No hotels found in {city}. Type above to add one.
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
+import HotelCombobox from './HotelCombobox';
 
 // -------------------------------------------------------------
 // MAIN HOTEL VOUCHER MANAGER COMPONENT
@@ -395,6 +146,12 @@ export default function HotelVoucherManager({ hotelVouchers = [], parties = [], 
   const [issueDate, setIssueDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [activeTab, setActiveTab] = useState('STAYS'); // 'STAYS' | 'PASSENGERS' | 'EMERGENCY'
   const [paxList, setPaxList] = useState([]);
+  const [editingVoucherId, setEditingVoucherId] = useState(null);
+
+  // Delete Voucher Modal State (Password Protected)
+  const [deletingVoucher, setDeletingVoucher] = useState(null);
+  const [deletePassword, setDeletePassword] = useState('');
+  const [deleteError, setDeleteError] = useState('');
 
   // Emergency Concierge Numbers (Customizable by user)
   const [emergencyKsaGround, setEmergencyKsaGround] = useState('+966 53 649 2846');
@@ -403,6 +160,7 @@ export default function HotelVoucherManager({ hotelVouchers = [], parties = [], 
 
   // Sync paxList whenever target party or modal visibility changes
   useEffect(() => {
+    if (editingVoucherId) return;
     const selectedParty = parties.find(p => p.partyHeadUid === targetPartyUid) || parties[0];
     if (selectedParty && Array.isArray(selectedParty.passengers)) {
       setPaxList(selectedParty.passengers.map((p) => ({
@@ -412,7 +170,7 @@ export default function HotelVoucherManager({ hotelVouchers = [], parties = [], 
     } else {
       setPaxList([]);
     }
-  }, [targetPartyUid, parties, showCreateModal]);
+  }, [targetPartyUid, parties, showCreateModal, editingVoucherId]);
 
   const handleToggleBed = (index, hasBedVal) => {
     setPaxList(prev => prev.map((p, i) => i === index ? { ...p, hasBed: hasBedVal } : p));
@@ -435,6 +193,7 @@ export default function HotelVoucherManager({ hotelVouchers = [], parties = [], 
       id: 'stay-1',
       city: 'Makkah',
       hotelName: 'VOCO 5 STAR',
+      distance: '850m from Haram',
       stars: 5,
       category: '5 Star Hotel',
       checkIn: '2026-10-10',
@@ -448,6 +207,7 @@ export default function HotelVoucherManager({ hotelVouchers = [], parties = [], 
       id: 'stay-2',
       city: 'Medinah',
       hotelName: 'GULNAR HV',
+      distance: '150m from Nabawi',
       stars: 4,
       category: '4 Star Hotel',
       checkIn: '2026-10-15',
@@ -461,6 +221,7 @@ export default function HotelVoucherManager({ hotelVouchers = [], parties = [], 
       id: 'stay-3',
       city: 'Makkah',
       hotelName: 'SWISSOTEL MAKKAH',
+      distance: '0m (Direct Haram View)',
       stars: 5,
       category: '5 Star Hotel',
       checkIn: '2026-10-22',
@@ -514,6 +275,7 @@ export default function HotelVoucherManager({ hotelVouchers = [], parties = [], 
         id: `stay-${Date.now()}-${Math.random().toString().slice(2, 6)}`,
         city: nextCity,
         hotelName: defaultHotel,
+        distance: '',
         stars: defaultStars,
         category: `${defaultStars} Star Hotel`,
         checkIn: nextCheckIn,
@@ -544,6 +306,109 @@ export default function HotelVoucherManager({ hotelVouchers = [], parties = [], 
     setStays(updated);
   };
 
+  const handleOpenCreate = () => {
+    setEditingVoucherId(null);
+    const defaultParty = parties[0]?.partyHeadUid || '';
+    setTargetPartyUid(defaultParty);
+    setIssueDate(new Date().toISOString().split('T')[0]);
+    setStays([
+      {
+        id: 'stay-1',
+        city: 'Makkah',
+        hotelName: 'VOCO 5 STAR',
+        distance: '850m from Haram',
+        stars: 5,
+        category: '5 Star Hotel',
+        checkIn: '2026-10-10',
+        checkOut: '2026-10-15',
+        roomType: 'Quad',
+        mealPlan: 'RO',
+        hcn: 'HCN-108047',
+        hotelPhone: '+966 53 649 2846'
+      },
+      {
+        id: 'stay-2',
+        city: 'Medinah',
+        hotelName: 'GULNAR HV',
+        distance: '150m from Nabawi',
+        stars: 4,
+        category: '4 Star Hotel',
+        checkIn: '2026-10-15',
+        checkOut: '2026-10-22',
+        roomType: 'Quad',
+        mealPlan: 'RO',
+        hcn: 'HCN-108048',
+        hotelPhone: '+966 57 593 0550'
+      },
+      {
+        id: 'stay-3',
+        city: 'Makkah',
+        hotelName: 'SWISSOTEL MAKKAH',
+        distance: '0m (Direct Haram View)',
+        stars: 5,
+        category: '5 Star Hotel',
+        checkIn: '2026-10-22',
+        checkOut: '2026-10-27',
+        roomType: 'Quad',
+        mealPlan: 'RO',
+        hcn: 'HCN-108049',
+        hotelPhone: '+966 53 649 2846'
+      }
+    ]);
+    setShowCreateModal(true);
+  };
+
+  const handleOpenEdit = (v) => {
+    setEditingVoucherId(v.id || v.voucherNo);
+    setTargetPartyUid(v.partyHeadUid);
+    setIssueDate(v.issueDate || new Date().toISOString().split('T')[0]);
+    if (Array.isArray(v.stays) && v.stays.length > 0) {
+      setStays(v.stays.map((s, idx) => ({
+        id: s.id || `stay-${idx + 1}`,
+        city: s.city || 'Makkah',
+        hotelName: s.hotelName || '',
+        distance: s.distance || '',
+        stars: s.stars || 5,
+        category: s.category || `${s.stars || 5} Star Hotel`,
+        checkIn: s.checkIn || '2026-10-10',
+        checkOut: s.checkOut || '2026-10-15',
+        roomType: s.roomType || 'Quad',
+        mealPlan: s.mealPlan || 'RO',
+        hcn: s.hcn || '',
+        hotelPhone: s.hotelPhone || '',
+      })));
+    }
+    if (Array.isArray(v.passengers) && v.passengers.length > 0) {
+      setPaxList(v.passengers.map(p => ({
+        ...p,
+        hasBed: p.hasBed !== undefined ? Boolean(p.hasBed) : (p.category !== 'Infant'),
+      })));
+    }
+    if (v.emergencyContacts) {
+      setEmergencyKsaGround(v.emergencyContacts.ksaGround || '+966 53 649 2846');
+      setEmergencyMadinah(v.emergencyContacts.madinah || '+966 57 593 0550');
+      setEmergencyPkHeadOffice(v.emergencyContacts.pkHeadOffice || 'MUHAMMAD FAIZAN 0311-2324764 / G.MURTAZA (HAJI) 0312-3608683');
+    }
+    setShowCreateModal(true);
+  };
+
+  const handleConfirmDelete = (e) => {
+    e.preventDefault();
+    if (!deletingVoucher) return;
+    const pwd = (deletePassword || '').trim();
+    if (pwd !== 'Noor@.5923' && pwd !== 'Cheepa@2026') {
+      setDeleteError('Incorrect admin password. Deletion cancelled.');
+      return;
+    }
+    const updated = deleteHotelVoucher(deletingVoucher.id);
+    if (onVouchersUpdated) {
+      onVouchersUpdated(updated || []);
+    }
+    setDeletingVoucher(null);
+    setDeletePassword('');
+    setDeleteError('');
+  };
+
   const handleCreateHotelVoucher = (e) => {
     e.preventDefault();
     const party = parties.find(p => p.partyHeadUid === targetPartyUid);
@@ -561,16 +426,17 @@ export default function HotelVoucherManager({ hotelVouchers = [], parties = [], 
       }
     }
 
-    const vId = `HV-${party.voucherRefNo || party.partyHeadUid}`;
+    const vId = editingVoucherId || `HV-${party.voucherRefNo || party.partyHeadUid}`;
     const compiledStays = stays.map((s, idx) => {
       const starNum = parseInt(s.stars) || 5;
       if (s.hotelName) {
         saveRegisteredHotelStar(s.hotelName, starNum);
       }
       return {
-        id: `stay-${Date.now()}-${idx + 1}`,
+        id: s.id || `stay-${Date.now()}-${idx + 1}`,
         city: s.city,
         hotelName: s.hotelName.trim().toUpperCase(),
+        distance: (s.distance || '').trim(),
         stars: starNum,
         category: s.category || `${starNum} Star Hotel`,
         checkIn: s.checkIn,
@@ -613,9 +479,11 @@ export default function HotelVoucherManager({ hotelVouchers = [], parties = [], 
     };
 
     saveHotelVoucher(newVoucher);
-    if (onVouchersUpdated) onVouchersUpdated([newVoucher, ...hotelVouchers]);
+    const all = getAllHotelVouchers();
+    if (onVouchersUpdated) onVouchersUpdated(all);
 
     setShowCreateModal(false);
+    setEditingVoucherId(null);
   };
 
   const filteredVouchers = hotelVouchers.filter((v) => {
@@ -648,7 +516,7 @@ export default function HotelVoucherManager({ hotelVouchers = [], parties = [], 
         </div>
 
         <button
-          onClick={() => setShowCreateModal(true)}
+          onClick={handleOpenCreate}
           className="inline-flex items-center gap-1.5 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold shadow-xs transition-all active:scale-95 cursor-pointer"
         >
           <PlusCircle className="w-3.5 h-3.5 text-slate-300" />
@@ -751,13 +619,37 @@ export default function HotelVoucherManager({ hotelVouchers = [], parties = [], 
                   </span>
 
                   <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => handleOpenEdit(v)}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-800 text-[10.5px] font-bold border border-slate-300 transition-colors cursor-pointer"
+                      title="Edit Hotel Voucher"
+                    >
+                      <Edit3 className="w-3 h-3 text-slate-600" />
+                      <span>Edit</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setDeletingVoucher(v);
+                        setDeletePassword('');
+                        setDeleteError('');
+                      }}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-rose-50 hover:bg-rose-100 text-rose-700 text-[10.5px] font-bold border border-rose-200 transition-colors cursor-pointer"
+                      title="Delete Hotel Voucher (Password Required)"
+                    >
+                      <Trash2 className="w-3 h-3 text-rose-600" />
+                      <span>Delete</span>
+                    </button>
+
                     <Link
                       href={`/hotel-voucher/${v.id}`}
                       target="_blank"
-                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-800 text-[10.5px] font-bold border border-slate-300 transition-colors"
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-slate-900 hover:bg-slate-800 text-white text-[10.5px] font-bold shadow-2xs transition-colors"
                     >
                       <span>View &amp; Print (A4)</span>
-                      <ExternalLink className="w-3 h-3 text-slate-500" />
+                      <ExternalLink className="w-3 h-3 text-slate-300" />
                     </Link>
                   </div>
                 </div>
@@ -782,17 +674,20 @@ export default function HotelVoucherManager({ hotelVouchers = [], parties = [], 
                 </div>
                 <div>
                   <h3 className="font-extrabold text-slate-900 text-base sm:text-lg tracking-tight">
-                    Generate Multi-Stay Hotel Voucher
+                    {editingVoucherId ? `Edit Hotel Voucher (${editingVoucherId})` : 'Generate Multi-Stay Hotel Voucher'}
                   </h3>
                   <p className="text-xs text-slate-500">
-                    Configure multi-city chronological accommodation blocks with live verification
+                    {editingVoucherId ? 'Update accommodation blocks, room types, dates, or passenger details' : 'Configure multi-city chronological accommodation blocks with live verification'}
                   </p>
                 </div>
               </div>
 
               <button 
                 type="button"
-                onClick={() => setShowCreateModal(false)} 
+                onClick={() => {
+                  setShowCreateModal(false);
+                  setEditingVoucherId(null);
+                }} 
                 className="w-8 h-8 rounded-full bg-slate-100 text-slate-400 hover:text-slate-700 hover:bg-slate-200 flex items-center justify-center transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
@@ -826,12 +721,10 @@ export default function HotelVoucherManager({ hotelVouchers = [], parties = [], 
                     <Calendar className="w-3.5 h-3.5 text-emerald-600" />
                     <span>Issue Date *</span>
                   </label>
-                  <input
-                    type="date"
+                  <CustomDatePicker
                     value={issueDate}
-                    onChange={(e) => setIssueDate(e.target.value)}
-                    className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl bg-white font-bold text-slate-900 text-xs shadow-2xs outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-800 cursor-pointer"
-                    required
+                    onChange={(val) => setIssueDate(val)}
+                    placeholder="YYYY-MM-DD"
                   />
                 </div>
 
@@ -1000,10 +893,10 @@ export default function HotelVoucherManager({ hotelVouchers = [], parties = [], 
                             </div>
                           </div>
 
-                          {/* Stay Fields Grid: Hotel Name, Star Rating, HCN */}
+                          {/* Stay Fields Grid: Hotel Name, Distance, Star Rating, HCN */}
                           <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
                             {/* Hotel Name Input with Smart Combobox */}
-                            <div className="sm:col-span-6">
+                            <div className="sm:col-span-4">
                               <label className="block text-slate-700 font-bold mb-1 text-[11px] uppercase tracking-wider">
                                 Hotel Property Name * ({stay.city})
                               </label>
@@ -1019,8 +912,11 @@ export default function HotelVoucherManager({ hotelVouchers = [], parties = [], 
                                     clean.includes('3 STAR') ? 3 :
                                     clean.includes('2 STAR') ? 2 : (stay.stars || 5)
                                   );
+                                  const regDist = getHotelDistance(clean);
                                   updateStay(idx, {
                                     hotelName: val,
+                                    distance: regDist || stay.distance || '',
+                                    distanceModified: false,
                                     stars: detectedStars,
                                     category: `${detectedStars} Star Hotel`
                                   });
@@ -1029,8 +925,67 @@ export default function HotelVoucherManager({ hotelVouchers = [], parties = [], 
                               />
                             </div>
 
-                            {/* Dynamic Star Rating with Auto-Save */}
+                            {/* Hotel Distance Input with Save Changes */}
                             <div className="sm:col-span-3">
+                              <div className="flex items-center justify-between mb-1">
+                                <label className="block text-slate-700 font-bold text-[11px] uppercase tracking-wider">
+                                  Distance {stay.city === 'Medinah' ? '(from Nabawi)' : '(from Haram)'}
+                                </label>
+                                {stay.distanceModified && (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      if (stay.hotelName) {
+                                        saveRegisteredHotelDistance(stay.hotelName, stay.distance);
+                                        updateStay(idx, { distanceModified: false, distanceSaved: true });
+                                        setTimeout(() => updateStay(idx, { distanceSaved: false }), 3000);
+                                      }
+                                    }}
+                                    className="text-[9px] font-bold text-emerald-700 hover:text-emerald-900 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 px-1.5 py-0.5 rounded flex items-center gap-1 cursor-pointer shadow-2xs transition-all animate-in fade-in"
+                                    title="Save Changes to Hotel Property"
+                                  >
+                                    <Save className="w-2.5 h-2.5 text-emerald-600" />
+                                    <span>Save Changes</span>
+                                  </button>
+                                )}
+                              </div>
+                              <div className="relative flex items-center">
+                                <input 
+                                  type="text" 
+                                  placeholder={stay.city === 'Medinah' ? 'e.g. 150m from Nabawi' : 'e.g. 350m from Haram'}
+                                  value={stay.distance || ''} 
+                                  onChange={(e) => {
+                                    const val = e.target.value;
+                                    const regDist = getHotelDistance(stay.hotelName);
+                                    const isDiff = (val || '').trim() !== (regDist || '').trim();
+                                    updateStay(idx, { distance: val, distanceModified: isDiff });
+                                  }} 
+                                  className={`w-full px-3 py-2 border rounded-xl bg-white text-xs font-semibold text-slate-900 shadow-2xs outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-800 ${
+                                    stay.distanceModified ? 'border-emerald-500 ring-1 ring-emerald-500/20 pr-16' : 'border-slate-300'
+                                  }`} 
+                                />
+                                {stay.distanceModified && (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      if (stay.hotelName) {
+                                        saveRegisteredHotelDistance(stay.hotelName, stay.distance);
+                                        updateStay(idx, { distanceModified: false, distanceSaved: true });
+                                        setTimeout(() => updateStay(idx, { distanceSaved: false }), 3000);
+                                      }
+                                    }}
+                                    className="absolute right-1 px-2 py-1 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-lg text-[9.5px] font-bold flex items-center gap-1 shadow-2xs transition-all cursor-pointer"
+                                    title="Save changes to hotel property"
+                                  >
+                                    <Save className="w-3 h-3 stroke-[2.5]" />
+                                    <span>Save</span>
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Dynamic Star Rating with Auto-Save */}
+                            <div className="sm:col-span-2">
                               <div className="flex items-center justify-between mb-1">
                                 <label className="block text-slate-700 font-bold text-[11px] uppercase tracking-wider">
                                   Star Rating *
@@ -1081,11 +1036,10 @@ export default function HotelVoucherManager({ hotelVouchers = [], parties = [], 
                           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
                             <div>
                               <label className="block text-slate-600 font-bold mb-1 text-[11px]">Check-In</label>
-                              <input 
-                                type="date" 
+                              <CustomDatePicker 
                                 value={stay.checkIn} 
-                                onChange={(e) => updateStay(idx, 'checkIn', e.target.value)} 
-                                className="w-full px-2.5 py-1.5 border border-slate-300 rounded-xl bg-white font-mono text-xs font-semibold text-slate-800 shadow-2xs outline-none focus:border-slate-800" 
+                                onChange={(val) => updateStay(idx, 'checkIn', val)} 
+                                placeholder="YYYY-MM-DD"
                               />
                             </div>
                             <div>
@@ -1095,11 +1049,11 @@ export default function HotelVoucherManager({ hotelVouchers = [], parties = [], 
                                   {stayNights}N
                                 </span>
                               </div>
-                              <input 
-                                type="date" 
+                              <CustomDatePicker 
                                 value={stay.checkOut} 
-                                onChange={(e) => updateStay(idx, 'checkOut', e.target.value)} 
-                                className="w-full px-2.5 py-1.5 border border-slate-300 rounded-xl bg-white font-mono text-xs font-semibold text-slate-800 shadow-2xs outline-none focus:border-slate-800" 
+                                onChange={(val) => updateStay(idx, 'checkOut', val)} 
+                                minDate={stay.checkIn || undefined}
+                                placeholder="YYYY-MM-DD"
                               />
                             </div>
                             <div>
@@ -1353,7 +1307,10 @@ export default function HotelVoucherManager({ hotelVouchers = [], parties = [], 
                 <div className="flex items-center gap-2.5">
                   <button
                     type="button"
-                    onClick={() => setShowCreateModal(false)}
+                    onClick={() => {
+                      setShowCreateModal(false);
+                      setEditingVoucherId(null);
+                    }}
                     className="px-4 py-2 text-slate-600 hover:text-slate-800 font-semibold text-xs rounded-xl hover:bg-slate-100 transition cursor-pointer"
                   >
                     Cancel
@@ -1363,13 +1320,92 @@ export default function HotelVoucherManager({ hotelVouchers = [], parties = [], 
                     className="px-6 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold shadow-md transition-all active:scale-95 flex items-center gap-2 cursor-pointer"
                   >
                     <Check className="w-4 h-4 text-emerald-400" />
-                    <span>Confirm &amp; Generate Hotel Voucher</span>
+                    <span>{editingVoucherId ? 'Save Voucher Changes' : 'Confirm & Generate Hotel Voucher'}</span>
                   </button>
                 </div>
               </div>
 
             </form>
 
+          </div>
+        </div>
+      )}
+
+      {/* ============================================================== */}
+      {/* DELETE CONFIRMATION MODAL WITH PASSWORD PROTECTION */}
+      {/* ============================================================== */}
+      {deletingVoucher && (
+        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-150">
+          <div className="bg-white rounded-3xl shadow-2xl border border-slate-200 max-w-md w-full overflow-hidden p-6 animate-in zoom-in-95 duration-150 space-y-4">
+            
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
+                <Trash2 className="w-6 h-6 text-rose-600" />
+              </div>
+              <div>
+                <h3 className="font-extrabold text-slate-900 text-base">
+                  Delete Hotel Voucher?
+                </h3>
+                <p className="text-xs text-slate-500 font-mono">
+                  {deletingVoucher.voucherNo || deletingVoucher.id} • {deletingVoucher.partyName}
+                </p>
+              </div>
+            </div>
+
+            <p className="text-xs text-slate-600 leading-relaxed bg-amber-50 border border-amber-200/80 rounded-xl p-3">
+              This will permanently remove this hotel voucher and itinerary records from the database. Please enter the <strong>Admin Password</strong> to authorize deletion.
+            </p>
+
+            <form onSubmit={handleConfirmDelete} className="space-y-4 pt-1">
+              <div>
+                <label className="block text-slate-700 font-bold mb-1.5 text-xs flex items-center gap-1.5">
+                  <Lock className="w-3.5 h-3.5 text-slate-500" />
+                  <span>Admin Password *</span>
+                </label>
+                <div className="relative">
+                  <KeyRound className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="password"
+                    autoFocus
+                    required
+                    placeholder="Enter admin password to confirm"
+                    value={deletePassword}
+                    onChange={(e) => {
+                      setDeletePassword(e.target.value);
+                      setDeleteError('');
+                    }}
+                    className="w-full pl-9 pr-3.5 py-2.5 border border-slate-300 rounded-xl text-xs font-bold text-slate-900 outline-none focus:ring-2 focus:ring-rose-600/20 focus:border-rose-600"
+                  />
+                </div>
+                {deleteError && (
+                  <p className="text-xs text-rose-600 font-semibold mt-1.5 flex items-center gap-1">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    <span>{deleteError}</span>
+                  </p>
+                )}
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDeletingVoucher(null);
+                    setDeletePassword('');
+                    setDeleteError('');
+                  }}
+                  className="px-4 py-2 text-slate-600 hover:text-slate-800 font-semibold text-xs rounded-xl hover:bg-slate-100 transition cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shadow-md transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Delete Voucher</span>
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
