@@ -257,8 +257,12 @@ export default function HotelVoucherViewPage() {
     p.relationship?.toLowerCase() === 'head'
   ) || passengers[0] || { name: voucher.partyName || 'LEAD GUEST' };
 
-  const leadName = headPax.name || voucher.partyName || 'LEAD GUEST';
-  const leadPrefix = headPax.prefix ? `${headPax.prefix} ` : '';
+  let rawLeadName = headPax.name || voucher.partyName || 'LEAD GUEST';
+  if ((!rawLeadName || rawLeadName.toLowerCase().includes('unnamed')) && voucher.partyName && !voucher.partyName.toLowerCase().includes('unnamed')) {
+    rawLeadName = voucher.partyName;
+  }
+  const leadName = rawLeadName;
+  const leadPrefix = (headPax.prefix && !leadName.toUpperCase().startsWith(headPax.prefix.toUpperCase())) ? `${headPax.prefix} ` : '';
   const leadPassport = headPax.passportNo || '—';
   const leadPhone = headPax.contactPhone || voucher.contactPhone || voucher.phone || '+92 328 8189989';
 

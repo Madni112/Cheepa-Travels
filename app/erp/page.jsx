@@ -85,6 +85,7 @@ export default function ErpPortalPage({ initialTab = 'DASHBOARD' }) {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [hotelPrefillData, setHotelPrefillData] = useState(null);
   const [transportOnlyVouchers, setTransportOnlyVouchers] = useState([]);
+  const [openTransportCreateTrigger, setOpenTransportCreateTrigger] = useState(0);
 
   const handleGenerateHotelFromTransport = (transportVoucher) => {
     const matchingParty = parties.find(p => 
@@ -702,13 +703,24 @@ export default function ErpPortalPage({ initialTab = 'DASHBOARD' }) {
           {/* Quick Actions & Short Navigation */}
           <div className="flex items-center gap-2 sm:gap-3">
             
-            <Link
-              href="/create"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold shadow-xs transition-all active:scale-95"
-            >
-              <PlusCircle className="w-3.5 h-3.5 text-slate-300" />
-              <span className="hidden sm:inline">New Voucher</span>
-            </Link>
+            {activeTab === 'TRANSPORTS' ? (
+              <button
+                type="button"
+                onClick={() => setOpenTransportCreateTrigger(prev => prev + 1)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold shadow-xs transition-all active:scale-95 cursor-pointer"
+              >
+                <PlusCircle className="w-3.5 h-3.5 text-slate-300" />
+                <span className="hidden sm:inline">New Voucher</span>
+              </button>
+            ) : (
+              <Link
+                href="/create"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold shadow-xs transition-all active:scale-95"
+              >
+                <PlusCircle className="w-3.5 h-3.5 text-slate-300" />
+                <span className="hidden sm:inline">New Voucher</span>
+              </Link>
+            )}
 
             <button
               onClick={() => handleTabSwitch('TRANSPORTS')}
@@ -769,6 +781,7 @@ export default function ErpPortalPage({ initialTab = 'DASHBOARD' }) {
             <TransportVoucherManager 
               parties={parties}
               onGenerateHotelVoucher={handleGenerateHotelFromTransport}
+              openCreateTrigger={openTransportCreateTrigger}
             />
           )}
 
