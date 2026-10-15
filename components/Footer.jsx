@@ -1,12 +1,13 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
+import { isErpRoute } from '../lib/erpRouting';
 
 export default function Footer() {
   const pathname = usePathname();
 
   // Hide global website footer on ERP Portal and hotel-voucher for dedicated view experience
-  if (pathname && (pathname.startsWith('/erp') || pathname.startsWith('/hotel-voucher'))) {
+  if (isErpRoute(pathname)) {
     return null;
   }
 

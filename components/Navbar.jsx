@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '../lib/AuthContext';
+import { isErpRoute } from '../lib/erpRouting';
 import { Compass, PlusCircle, Layers, Lock, LogOut, ShieldCheck, Building2 } from 'lucide-react';
 
 import whiteLogo from './White-Logo.png';
@@ -13,7 +14,7 @@ export default function Navbar() {
   const { isAdmin, logout } = useAuth();
 
   // If inside ERP Portal or Hotel Voucher View, let the dedicated layout manage its own header
-  if (pathname && (pathname.startsWith('/erp') || pathname.startsWith('/hotel-voucher'))) {
+  if (isErpRoute(pathname)) {
     return null;
   }
 
