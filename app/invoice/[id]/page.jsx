@@ -196,7 +196,7 @@ export default function InvoiceViewPage() {
             </div>
 
             <h1 className="text-xl sm:text-2xl font-black text-emerald-950 uppercase tracking-tight">
-              {invoice.companyName || 'CHEEPA TRAVELS'}
+              {invoice.companyName || 'CHEEPA FJ TRAVELS'}
             </h1>
             <p className="text-xs text-slate-600 font-medium">
               Registered Umrah &amp; Hajj Tour Operator • Corporate Finance Division
@@ -383,10 +383,10 @@ export default function InvoiceViewPage() {
           {/* Bank Payment Coordinates */}
           <div className="bg-amber-50/60 border border-amber-200 rounded-lg p-3 text-[10px] space-y-1">
             <span className="font-bold text-amber-950 uppercase tracking-wide block border-b border-amber-200 pb-1 mb-1.5">
-              Official Wire &amp; Bank Coordinates (Cheepa Travels)
+              Official Wire &amp; Bank Coordinates (Cheepa FJ Travels)
             </span>
             <p><strong className="text-slate-800">Bank Name:</strong> {invoice.bankDetails?.bankName || 'Meezan Bank Limited'}</p>
-            <p><strong className="text-slate-800">Account Title:</strong> {invoice.bankDetails?.accountTitle || 'CHEEPA TRAVELS'}</p>
+            <p><strong className="text-slate-800">Account Title:</strong> {invoice.bankDetails?.accountTitle || 'CHEEPA FJ TRAVELS'}</p>
             <p><strong className="text-slate-800">Account #:</strong> <span className="font-mono font-bold">{invoice.bankDetails?.accountNumber || '0289-0105829101'}</span></p>
             <p><strong className="text-slate-800">IBAN:</strong> <span className="font-mono font-bold">{invoice.bankDetails?.iban || 'PK49MEZN0002890105829101'}</span></p>
             <p className="text-[9px] text-amber-900/80 pt-1">

@@ -24,16 +24,24 @@ export default function FamilyGroupCombobox({
   const dropdownRef = useRef(null);
   const inputRef = useRef(null);
 
-  const selectedParty = parties.find(p => p.partyHeadUid === value);
+  const selectedParty = parties.find(p => 
+    p.partyHeadUid === value || 
+    (value && p.partyName?.trim().toLowerCase() === value.trim().toLowerCase()) ||
+    (value && p.voucherRefNo === value) ||
+    (value && p.fid === value)
+  );
 
   // Sync display query when value or parties change
   useEffect(() => {
     if (selectedParty) {
       setQuery(selectedParty.partyName || '');
-    } else if (!value) {
+    } else if (value) {
+      const byName = parties.find(p => p.partyName?.trim().toLowerCase() === value.trim().toLowerCase());
+      setQuery(byName ? byName.partyName : value);
+    } else {
       setQuery('');
     }
-  }, [value, selectedParty]);
+  }, [value, selectedParty, parties]);
 
   // Click outside to close
   useEffect(() => {
@@ -43,12 +51,15 @@ export default function FamilyGroupCombobox({
         // If query was modified without selecting, reset query to selected party name
         if (selectedParty) {
           setQuery(selectedParty.partyName || '');
+        } else if (value) {
+          const byName = parties.find(p => p.partyName?.trim().toLowerCase() === value.trim().toLowerCase());
+          setQuery(byName ? byName.partyName : value);
         }
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [selectedParty]);
+  }, [selectedParty, value, parties]);
 
   const cleanQuery = (query || '').trim().toLowerCase();
 

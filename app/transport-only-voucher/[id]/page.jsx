@@ -244,7 +244,7 @@ export default function TransportVoucherViewPage() {
           <div className="flex items-center justify-start shrink-0 z-10">
             <img 
               src={voucher.logo || "/logo.png"} 
-              alt={voucher.companyName || "Cheepa Travels Logo"} 
+              alt={voucher.companyName || "Cheepa FJ Travels Logo"} 
               className="h-24 sm:h-28 print:h-[105px] max-w-[250px] sm:max-w-[300px] print:max-w-[300px] w-auto object-contain drop-shadow-sm" 
             />
           </div>

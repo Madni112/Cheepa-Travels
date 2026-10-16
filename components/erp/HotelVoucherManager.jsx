@@ -49,7 +49,8 @@ import {
   getHotelDistance,
   saveRegisteredHotelDistance,
   saveParty,
-  getNextFidNumber
+  getNextFidNumber,
+  isAgencyPhone
 } from '../../lib/erpData';
 import CustomDatePicker from './CustomDatePicker';
 import FamilyGroupCombobox from './FamilyGroupCombobox';
@@ -153,6 +154,7 @@ export default function HotelVoucherManager({
 
   // Form State
   const [targetPartyUid, setTargetPartyUid] = useState(parties[0]?.partyHeadUid || '');
+  const [customerPhone, setCustomerPhone] = useState('');
   const [issueDate, setIssueDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [activeTab, setActiveTab] = useState('STAYS'); // 'STAYS' | 'PASSENGERS' | 'EMERGENCY'
   const [paxList, setPaxList] = useState([]);
@@ -533,6 +535,9 @@ export default function HotelVoucherManager({
     setEditingVoucherId(null);
     const defaultParty = parties[0]?.partyHeadUid || '';
     setTargetPartyUid(defaultParty);
+    const matchedParty = parties.find(p => p.partyHeadUid === defaultParty);
+    const defaultPhone = (matchedParty?.contactPhone && !isAgencyPhone(matchedParty.contactPhone)) ? matchedParty.contactPhone : '';
+    setCustomerPhone(defaultPhone);
     setIssueDate(new Date().toISOString().split('T')[0]);
     setStays([
       {
@@ -583,8 +588,16 @@ export default function HotelVoucherManager({
 
   const handleOpenEdit = (v) => {
     setEditingVoucherId(v.id || v.voucherNo);
-    setTargetPartyUid(v.partyHeadUid);
+    const matched = parties.find(p => 
+      (v.partyHeadUid && p.partyHeadUid === v.partyHeadUid) || 
+      (v.partyName && p.partyName?.trim().toLowerCase() === v.partyName?.trim().toLowerCase()) ||
+      (v.voucherRefNo && p.voucherRefNo === v.voucherRefNo)
+    );
+    const resolvedUid = matched?.partyHeadUid || v.partyHeadUid || v.partyName || '';
+    setTargetPartyUid(resolvedUid);
     setIssueDate(v.issueDate || new Date().toISOString().split('T')[0]);
+    const candidatePhone = v.customerPhone || v.contactPhone || matched?.contactPhone || '';
+    setCustomerPhone((candidatePhone && !isAgencyPhone(candidatePhone)) ? candidatePhone : '');
     if (Array.isArray(v.stays) && v.stays.length > 0) {
       setStays(v.stays.map((s, idx) => ({
         id: s.id || `stay-${idx + 1}`,
@@ -644,7 +657,11 @@ export default function HotelVoucherManager({
 
   const handleCreateHotelVoucher = (e) => {
     e.preventDefault();
-    const party = parties.find(p => p.partyHeadUid === targetPartyUid);
+    const party = parties.find(p => 
+      p.partyHeadUid === targetPartyUid || 
+      (p.partyName && p.partyName.trim().toLowerCase() === targetPartyUid?.trim().toLowerCase()) ||
+      (p.voucherRefNo && p.voucherRefNo === targetPartyUid)
+    );
     if (!party) {
       alert('Selected family group not found');
       return;
@@ -683,7 +700,12 @@ export default function HotelVoucherManager({
       };
     });
 
-    const targetPassengers = paxList.length > 0 ? paxList : (party.passengers || []);
+    const targetPassengers = (paxList.length > 0 ? paxList : (party.passengers || [])).map((p, idx) => {
+      if (idx === 0) {
+        return { ...p, contactPhone: customerPhone.trim() };
+      }
+      return p;
+    });
     const adultsCount = targetPassengers.filter(p => (p.category || 'Adult').toLowerCase() === 'adult').length;
     const childrenCount = targetPassengers.filter(p => (p.category || '').toLowerCase() === 'child').length;
     const infantsCount = targetPassengers.filter(p => (p.category || '').toLowerCase() === 'infant').length;
@@ -694,6 +716,7 @@ export default function HotelVoucherManager({
       ...party,
       totalPax: Math.max(totalCount, party.totalPax || 1),
       declaredPax: Math.max(totalCount, party.declaredPax || 1),
+      contactPhone: customerPhone.trim() || party.contactPhone || '',
       adultsCount,
       childrenCount,
       infantsCount,
@@ -718,7 +741,9 @@ export default function HotelVoucherManager({
       voucherNo: vId,
       partyHeadUid: party.partyHeadUid,
       partyName: party.partyName,
-      companyName: party.companyName || 'CHEEPA TRAVELS & TOURS',
+      companyName: party.companyName || 'CHEEPA FJ TRAVELS',
+      customerPhone: customerPhone.trim(),
+      contactPhone: customerPhone.trim(),
       totalPax: targetPassengers.length || party.totalPax || 1,
       passengers: targetPassengers,
       stays: compiledStays,
@@ -958,44 +983,71 @@ export default function HotelVoucherManager({
             {/* Modal Body (Scrollable) */}
             <form onSubmit={handleCreateHotelVoucher} className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-5 text-xs">
               
-              {/* Top Controls: Parent Party Select + Issue Date + Quick Stats */}
-              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/90 grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
-                <div className="md:col-span-5">
-                  <label className="block text-slate-700 font-bold mb-1.5 text-xs flex items-center justify-between">
-                    <span>Select Target Family Group *</span>
-                    <span className="text-[10px] text-emerald-700 font-semibold">Search existing or type new</span>
-                  </label>
-                  <FamilyGroupCombobox
-                    parties={parties}
-                    value={targetPartyUid}
-                    onChange={(newUid) => setTargetPartyUid(newUid)}
-                    onAddNewParty={handleAddNewParty}
-                    placeholder="Search family group or type new..."
-                  />
+              {/* Top Controls: Parent Party Select + Customer Phone + Issue Date + Quick Stats */}
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/90 space-y-3">
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+                  <div className="md:col-span-6">
+                    <label className="block text-slate-700 font-bold mb-1.5 text-xs flex items-center justify-between">
+                      <span>Select Target Family Group *</span>
+                      <span className="text-[10px] text-emerald-700 font-semibold">Search existing or type new</span>
+                    </label>
+                    <FamilyGroupCombobox
+                      parties={parties}
+                      value={targetPartyUid}
+                      onChange={(newUid) => {
+                        setTargetPartyUid(newUid);
+                        const matched = parties.find(p => p.partyHeadUid === newUid);
+                        if (matched?.contactPhone && !isAgencyPhone(matched.contactPhone)) {
+                          setCustomerPhone(matched.contactPhone);
+                        }
+                      }}
+                      onAddNewParty={handleAddNewParty}
+                      placeholder="Search family group or type new..."
+                    />
+                  </div>
+
+                  <div className="md:col-span-6">
+                    <label className="block text-slate-700 font-bold mb-1.5 text-xs flex items-center justify-between">
+                      <span className="flex items-center gap-1.5">
+                        <PhoneCall className="w-3.5 h-3.5 text-emerald-600" />
+                        <span>Customer Phone (Optional)</span>
+                      </span>
+                      <span className="text-[10px] text-slate-400 font-medium">Leave blank to hide from voucher</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={customerPhone}
+                      onChange={(e) => setCustomerPhone(e.target.value)}
+                      placeholder="e.g. +92 311 2324764 / 055 819 2401"
+                      className="w-full px-3 py-2 border border-slate-300 rounded-xl bg-white text-xs font-bold text-slate-800 outline-none focus:border-slate-800 transition"
+                    />
+                  </div>
                 </div>
 
-                <div className="md:col-span-4">
-                  <label className="block text-slate-700 font-bold mb-1.5 text-xs flex items-center gap-1.5">
-                    <Calendar className="w-3.5 h-3.5 text-emerald-600" />
-                    <span>Issue Date *</span>
-                  </label>
-                  <CustomDatePicker
-                    value={issueDate}
-                    onChange={(val) => setIssueDate(val)}
-                    placeholder="YYYY-MM-DD"
-                  />
-                </div>
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center pt-2 border-t border-slate-200/60">
+                  <div className="md:col-span-6">
+                    <label className="block text-slate-700 font-bold mb-1.5 text-xs flex items-center gap-1.5">
+                      <Calendar className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>Issue Date *</span>
+                    </label>
+                    <CustomDatePicker
+                      value={issueDate}
+                      onChange={(val) => setIssueDate(val)}
+                      placeholder="YYYY-MM-DD"
+                    />
+                  </div>
 
-                <div className="md:col-span-3 p-3 bg-white border border-slate-200 rounded-xl shadow-2xs flex items-center justify-between">
-                  <div>
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Total Itinerary</span>
-                    <span className="text-xs font-black text-slate-800">
-                      {stays.length} Stays • <span className="text-emerald-700">{totalNights} Nights</span>
+                  <div className="md:col-span-6 p-2.5 bg-white border border-slate-200 rounded-xl shadow-2xs flex items-center justify-between">
+                    <div>
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Total Itinerary</span>
+                      <span className="text-xs font-black text-slate-800">
+                        {stays.length} Stays • <span className="text-emerald-700">{totalNights} Nights</span>
+                      </span>
+                    </div>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                      A4 Ready
                     </span>
                   </div>
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
-                    A4 Ready
-                  </span>
                 </div>
               </div>
 

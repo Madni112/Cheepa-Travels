@@ -414,13 +414,13 @@ export default function ErpPortalPage({ initialTab = 'DASHBOARD' }) {
               <div className="w-14 h-14 rounded-2xl bg-white border border-slate-200/90 flex items-center justify-center p-1 shadow-xs group-hover:border-emerald-400 group-hover:shadow-md transition-all shrink-0 overflow-hidden">
                 <img 
                   src="/logo.png" 
-                  alt="Cheepa Travels Logo" 
+                  alt="Cheepa FJ Travels Logo" 
                   className="w-full h-full object-contain" 
                 />
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <span className="font-bold text-sm text-slate-900 tracking-tight leading-tight">CHEEPA TRAVELS</span>
+                  <span className="font-bold text-sm text-slate-900 tracking-tight leading-tight">CHEEPA FJ TRAVELS</span>
                   <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
                     ERP
                   </span>

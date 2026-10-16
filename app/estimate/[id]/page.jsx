@@ -63,7 +63,7 @@ export default function EstimateViewPage() {
       const quoteUrl = `${origin}/estimate/${estimate.id || id}`;
       const items = estimate.items || {};
       const bDetails = estimate.breakdownDetails || {};
-      const company = estimate.companyName || 'Cheepa Travels';
+      const company = estimate.companyName || 'Cheepa FJ Travels';
 
       let computedDur = '';
       if (bDetails.flightDateFrom && bDetails.flightDateTo) {
@@ -294,7 +294,7 @@ export default function EstimateViewPage() {
               <div className="flex items-center justify-start shrink-0">
                 <img 
                   src={estimate.companyLogo || estimate.logo || "/logo.png"} 
-                  alt={estimate.companyName || "Cheepa Travels Logo"} 
+                  alt={estimate.companyName || "Cheepa FJ Travels Logo"} 
                   className="h-20 sm:h-24 md:h-28 max-w-[280px] sm:max-w-[340px] w-auto object-contain drop-shadow-xs" 
                 />
               </div>
@@ -491,7 +491,7 @@ export default function EstimateViewPage() {
               </div>
               <div className="border-t border-slate-200 pt-3 text-center space-y-0.5">
                 <p className="font-bold text-xs text-slate-900 uppercase tracking-wide">
-                  {estimate.companyName || 'CHEEPA TRAVELS'}
+                  {estimate.companyName || 'CHEEPA FJ TRAVELS'}
                 </p>
                 <p className="text-slate-500 font-mono text-[10.5px]">
                   Helpline: 0311-2264567 / 0312-8039911 • Email: operations@cheepatravels.com
@@ -521,7 +521,7 @@ export default function EstimateViewPage() {
               </div>
 
               <h2 className="text-xl font-black text-slate-900 uppercase">
-                {estimate.companyName || 'CHEEPA TRAVELS'}
+                {estimate.companyName || 'CHEEPA FJ TRAVELS'}
               </h2>
               <p className="text-xs text-slate-600">
                 Internal Operations Cost Ledger • Itemized Unit Allocations &amp; Margins

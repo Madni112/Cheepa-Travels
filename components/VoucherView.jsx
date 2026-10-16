@@ -177,7 +177,7 @@ export default function VoucherView({ voucher, origin = '' }) {
         <div className="flex flex-col items-center justify-center text-center space-y-2 print:space-y-1 flex-[1.4] order-1 sm:order-2">
           <img 
             src="/logo.png" 
-            alt="Cheepa Travels Logo" 
+            alt="Cheepa FJ Travels Logo" 
             className="h-28 sm:h-40 max-w-[280px] sm:max-w-[340px] w-auto object-contain print:h-28 drop-shadow-md transition-all" 
           />
           <div className="flex items-center gap-1.5">

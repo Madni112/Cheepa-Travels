@@ -103,7 +103,7 @@ export default function TransportOnlyManager({ parties = [], onVouchersUpdated, 
   const [customerPhone, setCustomerPhone] = useState('');
   const [totalPax, setTotalPax] = useState(1);
   const [issueDate, setIssueDate] = useState(() => new Date().toISOString().split('T')[0]);
-  const [companyName, setCompanyName] = useState('CHEEPA TRAVELS');
+  const [companyName, setCompanyName] = useState('CHEEPA FJ TRAVELS');
 
   // Searchable dropdown state for Customer Name (Party Heads only)
   const [partyDropdownOpen, setPartyDropdownOpen] = useState(false);
@@ -332,7 +332,7 @@ export default function TransportOnlyManager({ parties = [], onVouchersUpdated, 
     const nextNo = getNextTransportVoucherNo('CTV-');
     setVoucherNo(nextNo);
     setIssueDate(new Date().toISOString().split('T')[0]);
-    setCompanyName('CHEEPA TRAVELS');
+    setCompanyName('CHEEPA FJ TRAVELS');
 
     setSelectedPartyHeadUid(null);
     setCustomerName('');
@@ -395,7 +395,7 @@ export default function TransportOnlyManager({ parties = [], onVouchersUpdated, 
     setPartySearchQuery(cleanCustName);
     setCustomerPhone(v.customerPhone || v.contactPhone || matched?.contactPhone || '');
     setIssueDate(v.issueDate || new Date().toISOString().split('T')[0]);
-    setCompanyName(v.companyName || 'CHEEPA TRAVELS');
+    setCompanyName(v.companyName || 'CHEEPA FJ TRAVELS');
 
     // Load passenger manifest
     let loadedPax = [];

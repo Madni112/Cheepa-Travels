@@ -56,7 +56,7 @@ export default function BillReceiptManager({
           partyName: inv.partyName || 'Valued Client',
           partyHeadUid: inv.partyHeadUid || '',
           contactPhone: inv.contactPhone || '',
-          companyName: inv.companyName || 'CHEEPA TRAVELS',
+          companyName: inv.companyName || 'CHEEPA FJ TRAVELS',
           currency: inv.currency || 'PKR',
           totalAmount: inv.totalAmount || 0,
           balanceDue: inv.balanceDue || 0,
