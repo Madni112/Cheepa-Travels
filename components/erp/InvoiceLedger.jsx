@@ -1544,8 +1544,8 @@ export default function InvoiceLedger({
                               {isCash ? <Wallet className="w-4 h-4" /> : <Landmark className="w-4 h-4" />}
                             </div>
                             <div>
-                              <h4 className="font-bold text-slate-900 text-xs">{acc.accountName}</h4>
-                              <p className="text-[10px] text-slate-400 font-semibold">{acc.bankName}</p>
+                              <h4 className="font-bold text-slate-900 text-xs">{acc.accountName || acc.name}</h4>
+                              <p className="text-[10px] text-slate-400 font-semibold">{acc.bankName || acc.branch || (acc.type === 'CASH' ? 'Cash Counter' : 'Bank Account')}</p>
                             </div>
                           </div>
 
@@ -1571,11 +1571,11 @@ export default function InvoiceLedger({
                         <div className="pt-2 border-t border-slate-100 text-[10.5px] space-y-1">
                           <div className="flex justify-between text-slate-500">
                             <span>Account Title:</span>
-                            <span className="font-semibold text-slate-800">{acc.accountTitle}</span>
+                            <span className="font-semibold text-slate-800">{acc.accountTitle || acc.name}</span>
                           </div>
                           <div className="flex justify-between text-slate-500">
                             <span>Account / Drawer #:</span>
-                            <span className="font-mono font-bold text-slate-800">{acc.accountNumber}</span>
+                            <span className="font-mono font-bold text-slate-800">{acc.accountNumber || (acc.code ? `GL: ${acc.code}` : '-')}</span>
                           </div>
                           {acc.iban && acc.iban !== '-' && (
                             <div className="flex justify-between text-slate-500">
