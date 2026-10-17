@@ -923,7 +923,7 @@ export default function ErpPortalPage({ initialTab = 'DASHBOARD' }) {
 
           {activeTab === 'CHART_OF_ACCOUNTS' && (
             <ChartOfAccounts 
-              companyName={companyName}
+              companyName="CHEEPA FJ TRAVELS"
               invoices={invoices}
               parties={parties}
             />
