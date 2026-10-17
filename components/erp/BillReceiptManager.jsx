@@ -504,7 +504,7 @@ export default function BillReceiptManager({
       {/* MODAL 2: PRINT OFFICIAL BILL RECEIPT SLIP                */}
       {/* ========================================================= */}
       {selectedReceiptForPrint && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-md p-4 overflow-y-auto">
           <div className="bg-white rounded-3xl max-w-2xl w-full p-8 shadow-2xl border border-slate-200 space-y-6 my-8">
             
             {/* Top Toolbar (Non-printable buttons) */}
